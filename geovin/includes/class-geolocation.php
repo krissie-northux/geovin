@@ -27,6 +27,11 @@ class Geolocation {
         add_action('woocommerce_init', array( $this, 'init' ) );
 	}
 
+	/**
+	 * Initialize geolocation functions
+	 * 
+	 * @return void
+	 */
 	public function init() {
 		self::$log = self::$log . ' || ' . 'initializing';
 		// Early initialize customer session
@@ -42,6 +47,13 @@ class Geolocation {
 		$this->maybe_load_scripts();
 	}
 
+	/**
+	 * Check for forceLocation or clearSession in URL
+	 * this was added to assist with client demonstration and
+	 * testing of the geolocation functionality
+	 * 
+	 * @return void
+	 */
 	private static function check_force() {
 		if ( isset( $_GET['clearSession'] ) && $_GET['clearSession'] === 'true' ) {
 			self::$needs_session_region = true;
@@ -72,6 +84,11 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Load scripts if we need to get region data
+	 * 
+	 * @return void
+	 */
 	private function maybe_load_scripts() {
 		if ( self::$needs_session_region /*|| isset($_GET['forceLocation'] )*/ ) {
 			add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_scripts' ) );
@@ -80,6 +97,12 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Check to see if we already know the region
+	 * Set it for the class if so
+	 *
+	 * @return void
+	 */
 	public static function check_region() {
 		//if ( isset($_GET['forceLocation'] ) ) {
 			//self::$needs_session_region = true;
@@ -99,6 +122,12 @@ class Geolocation {
 		
 	}
 
+	/**
+	 * Check to see if we already know the country
+	 * Set it for the class if so
+	 *
+	 * @return void
+	 */
 	public static function check_country() {
 		//check if we have session data (country)
 		//if ( isset($_GET['forceLocation'] ) ) {
@@ -120,6 +149,11 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Set the country session variables if we need to
+	 * 
+	 * @return void
+	 */
 	public static function maybe_set_country() {
 		/*
 		if (isset($_GET['forceLocation'] )) {
@@ -162,6 +196,12 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Normalize country values to US or CA
+	 * 
+	 * @param string $country The country value to normalize
+	 * @return string Normalized country value
+	 */
 	private static function normalize_country( $country ) {
 		if ( $country === 'US' || $country === 'CA' ) {
 			return $country;
@@ -177,6 +217,11 @@ class Geolocation {
 		return $country;
 	}
 
+	/**
+	 * Enqueue scripts to get user location and distance from Geovin
+	 * 
+	 * @return void
+	 */
 	public function enqueue_scripts() {
         wp_enqueue_script('maps-base', self::$maps_endpoint . '&key=' . self::$api_key, array(), false, true );
 		wp_enqueue_script('maps-geovin', get_plugin_url() . 'assets/js/geo-transit-price.js', array('maps-base','jquery'), '4', true );
@@ -197,6 +242,11 @@ class Geolocation {
         );
     }
 
+	/**
+	 * Enqueue alternative scripts if we don't need to get region data
+	 * 
+	 * @return void
+	 */
     public function enqueue_alt_scripts() {
 		wp_enqueue_script('maps-geovin', get_plugin_url() . 'assets/js/geo-transit-price.js', array('jquery'), '2', true );
 		
@@ -216,6 +266,11 @@ class Geolocation {
         );
     }
 
+	/**
+	 * Get session data for localization
+	 * 
+	 * @return array Session data
+	 */
     public function get_session_data() {
     	$session_data = array(
     		'geoCountry' => WC()->session->get('geo_country'),
@@ -227,6 +282,10 @@ class Geolocation {
 
     }
 
+	/**
+	 * Get raw data for localization
+	 * @return array Raw data
+	 */
     public function get_raw_data() {
     	$session_data = array(
     		'geoCountry' => self::get_geo_country(),
@@ -237,6 +296,10 @@ class Geolocation {
 
     }
 
+	/**
+	 * Get Geovin location
+	 * @return array Geovin location data
+	 */
     public function get_geovin_geo() {
     	$geovin_geo = array(
     		'latitude' => '43.7682931',
@@ -249,6 +312,8 @@ class Geolocation {
 
     /*
      * AJAX function to set distance 
+	 * 
+	 * @return void
      */
     public function set_distance() {
     	// Early initialize customer session
@@ -271,8 +336,10 @@ class Geolocation {
     	wp_die();
     }
 
-    /*
-     * Get users IP
+    /**
+     * Set the users IP address
+	 * 
+	 * @return void
      */
 	public function set_ip() {
 		self::$log = self::$log . ' || ' . 'getting ip';
@@ -281,9 +348,11 @@ class Geolocation {
 	}
 
 
-	/*
+	/**
      * Get lat/long for users IP
      * Use transient to reduce calls needed
+	 * 
+	 * @return array Geolocation data
      */
 	private static function get_geo_for_ip() {
 		$geo_transient = get_transient( 'geo_' . self::$session_ip );
@@ -301,6 +370,11 @@ class Geolocation {
 		return $geo;
 	}
 
+	/**
+	 * Get the country to use for pricing
+	 * 
+	 * @return string Country code
+	 */
 	public static function get_pricing_country() {
 
 		if ( isset(WC()->session) && ! WC()->session->has_session() ) {
@@ -357,6 +431,11 @@ class Geolocation {
 		return $country;
 	}
 
+	/**
+	 * Get the country from session or IP geolocation
+	 * 
+	 * @return string Country code
+	 */
 	public static function get_geo_country() {
 
 		if ( isset(WC()->session) && ! WC()->session->has_session() ) {
@@ -384,6 +463,11 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Get the country from IP geolocation only
+	 * 
+	 * @return string Country code
+	 */
 	public static function get_new_geo_country() {
 
 		$geo = self::get_geo_for_ip();
@@ -397,6 +481,11 @@ class Geolocation {
 		}
 	}
 
+	/**
+	 * Get the country from session or the users billing country
+	 * 
+	 * @return string Country code
+	 */
 	private static function get_user_country() {
 
 		if ( isset(WC()->session) && ! WC()->session->has_session() ) {

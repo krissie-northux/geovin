@@ -14,7 +14,7 @@ class Geovin_Product_Page {
             add_action( 'wp_head', array( $this, 'replace_variable_add_to_cart') );
 
             add_action( 'woocommerce_before_variations_form', array( $this, 'add_trending_tabs' ), 6);
-            add_action( 'woocommerce_before_variations_form', array( $this, 'add_geovin_product_code' ), 7);
+            //add_action( 'woocommerce_before_variations_form', array( $this, 'add_geovin_product_code' ), 7); this was moved
 
             //Add Geovin code data to variation inputs
             add_filter( 'woocommerce_dropdown_variation_attribute_options_html', array($this, 'add_geovin_product_code_data'), 10, 2);
@@ -37,6 +37,16 @@ class Geovin_Product_Page {
         }
        
     }
+
+    /**
+     * Replaces the default button text for variable products with a custom text.
+     * 
+     * @param string $html The HTML for the button.
+     * @param WC_Product $product The product object.
+     * @param array $args The arguments for the button.
+     * 
+     * @return string The modified HTML for the button.
+     */
     public function button_text( $html, $product, $args ) {
         $html = str_replace('class="button', 'class="button button--primary', $html);
         $html = str_replace('>Select options<','>View ' . $product->get_title() . '<', $html);
@@ -45,6 +55,13 @@ class Geovin_Product_Page {
         return $html;
     }
 
+    /**
+     * Adjust the woocommerce_single_product_summary action 
+     * to replace the default add to cart button and variations form
+     * with the Geovin button and form
+     * 
+     * @return void
+     */
     public function replace_variable_add_to_cart() {
 
         remove_action('woocommerce_single_product_summary', array( WC()->structured_data, 'generate_product_data' ), 60);
@@ -54,6 +71,11 @@ class Geovin_Product_Page {
         add_action( 'woocommerce_single_product_summary', array( $this, 'geovin_variable_add_to_cart' ), 30);
     }
 
+    /**
+     * Add freight and disclaimer information to the product price.
+     * 
+     * @return void
+     */
     public function add_price_msrp( $price, $product ){
 
         if ( ! user_can_build_order() ) {
@@ -123,6 +145,12 @@ class Geovin_Product_Page {
             
     }
 
+    /**
+     * Get the product attributes and related data
+     * 
+     * @param object $product The product object.
+     * @return array The attribute combinations.
+     */
     public function get_geovin_product_attributes( $product ) {
         $meta = $product->get_attributes();
         $attributes = array();
@@ -138,6 +166,11 @@ class Geovin_Product_Page {
         return $attributes;
     }
 
+    /**
+     * Add the Geovin variable add to cart button.
+     * 
+     * @return void
+     */
     public function geovin_variable_add_to_cart() {
         global $product;
 
@@ -169,6 +202,14 @@ class Geovin_Product_Page {
         
     }
 
+    /**
+     * In some templates the Geovin product type returns an empty
+     * string for the price (this is done to avoid costly db queries of 
+     * all variations). Even if the price is not shown, we need to return an integer value
+     * 
+     * @param int $price The product price
+     * @return int The modified price
+     */
     public function adjust_price( $price ) {
         if ( ! $price ) {
             $price = 1;
@@ -176,10 +217,28 @@ class Geovin_Product_Page {
         return $price;
     }
 
+    /**
+     * Generic function that returns true
+     * perferable for debugging vs __return_true
+     * 
+     * @param mixed $value The value to be returned.
+     * 
+     * @return boolean
+     */
     public function returntrue( $value ) {
         return true;
     }
 
+    /**
+     * Since Geovin product variations don't have images, we need to
+     * set these values to false so it doesn't break the product page
+     * 
+     * @param array $data The variation data.
+     * @param WC_Product_Variable $instance The variable product.
+     * @param WC_Product_Variation $variation The product variation object.
+     * 
+     * @return array The modified variation data.
+     */
     public function variationfilter( $data, $instance, $variation ) {
         $parent_id = $variation->get_parent_id();
         $data['image'] = false;
@@ -188,6 +247,11 @@ class Geovin_Product_Page {
         return $data;
     }
 
+    /**
+     * Add the Geovin email form overlay to the product page.
+     * 
+     * @return void
+     */
     public function email_form_overlay() {
         ?>
         
@@ -204,6 +268,11 @@ class Geovin_Product_Page {
         <?php
     }
 
+    /**
+     * Dynamically generates the specs script for the product page.
+     * 
+     * @return void
+     */
     public function dynamic_specs_script() {
         ?>
         <script>
@@ -254,6 +323,11 @@ class Geovin_Product_Page {
         <?php
     }
 
+    /**
+     * Generates the pretitle for the product page based on the product category.
+     * 
+     * @return void
+     */
     public function geovin_pretitle() {
         global $product;
         if ( has_term( 'beds', 'product_cat', $product->get_id() ) ) {
@@ -276,28 +350,38 @@ class Geovin_Product_Page {
         
     }
 
+    /**
+     * Add the dynamic spec markup to the product page.
+     * 
+     * @return void
+     */
     public function dynamic_spec( $atts ) {
         $spec = sanitize_title( $atts['spec'] );
         $convert = isset( $atts['convert'] ) ? $atts['convert'] : 'false';
         return '<span class="js-dynamic-spec js-dynamic-spec--' . $spec . '" data-convert="' . $convert . '"></span>';
     }
 
-    public function add_geovin_product_code() {
-        ?>
-        
-        <?php
-    }
-
+    /**
+     * Add data attributes to the variation form select options
+     * 
+     * @param string $html The HTML for the variations form.
+     * @param array $args The arguments for the variations form.
+     * @return string The modified HTML for the variations form.
+     */
     public function add_geovin_product_code_data($html, $args) {
         $new_html = $this->attribute_html( $args );
         return $new_html;
     }
 
-    /*
+    /**
      * This function is an adaptation of wc_dropdown_variation_attribute_options( $args )
      * located in woocommerce/includes/wc-template-functions.php
      * adaptation was needed to add a data attribute to the option value
      * data attribute is an ACF field added to the taxonomy term that contains the Geovin code
+     * 
+     * @param array $args The arguments for the variations form.
+     * 
+     * @return string The HTML for the variations form select options.
      */
     public function attribute_html( $args ) {
         $args = wp_parse_args(
@@ -369,6 +453,12 @@ class Geovin_Product_Page {
 
         return $html;
     }
+
+    /**
+     * Sort function to list finishes in the order
+     * Geovin prefers for users.
+     * 
+     */
     public static function sort_finishes( $a, $b ) {
         $a_code_wood_value = explode( '-', $a )[0];
         $b_code_wood_value = explode( '-', $b )[0];
@@ -393,15 +483,23 @@ class Geovin_Product_Page {
         } elseif ( $b_code_wood_value === 'P' ) {
             return +1;
         } 
-        
-        
     }
+
+    /**
+     * Sort function to sort dimensions in the order
+     * Geovin prefers for users.
+     */
     public static function sort_dimensions( $a, $b ) {
         $a_dim = explode('/', $a[1]);
         $b_dim = explode('/', $b[1]);
         return ( $a_dim < $b_dim ) ? -1 : +1;
     }
 
+    /**
+     * Add trending tab tab navigation markup to the product page.
+     * 
+     * @return void
+     */
     public function add_tabs_nav() {
         $trending = $this->get_trending_product_data();
         $tab_count = get_field('number_of_trending_items');
@@ -423,6 +521,11 @@ class Geovin_Product_Page {
         <?php
     }
 
+    /**
+     * Add trending tabs to the product page.
+     * 
+     * @return void
+     */
     public function add_trending_tabs() { 
         global $product;
         $sku_code = array();
@@ -467,6 +570,12 @@ class Geovin_Product_Page {
         <?php
     }
 
+    /**
+     * Gets the avaialbe attribute combinations for the product.
+     * Shapediver needs this to render options
+     * 
+     * @return array The trending product data.
+     */
     public function get_product_attribute_combos() {
         global $product;
         $attributes = self::get_geovin_product_attributes( $product );
@@ -541,6 +650,11 @@ class Geovin_Product_Page {
         
     }
 
+    /**
+     * Add trending tabs tab content markup to the product page.
+     * 
+     * @return void
+     */
     public function tab_content( $trending_item, $attribute_combos ) {
 
         foreach( $trending_item as $attribute_name => $attribute_value ) {
@@ -612,6 +726,13 @@ class Geovin_Product_Page {
             }
     }
 
+    /**
+     * Add the customization tab to the product page.
+     * 
+     * @param array $available_attributes The available attributes for the product.
+     * 
+     * @return void
+     */
     public function customization_tab_content( $available_attributes ) {
         foreach( $available_attributes as $key => $value ) {
             $pretty_name = ucwords( str_replace( '_', ' ', $key ) );
@@ -642,6 +763,13 @@ class Geovin_Product_Page {
         <?php
     }
 
+    /**
+     * Create a data attribute string for the trending item.
+     * 
+     * @param array $trending_item The trending item data.
+     * 
+     * @return string The data attribute string.
+     */
     public function create_data_attr_for_trending( $trending_item ) {
         $data_string = '';
         $data_json = json_encode($trending_item);
@@ -649,6 +777,13 @@ class Geovin_Product_Page {
         return $data_string;
     }
 
+    /**
+     * Get the trending product data.
+     * 
+     * @param int|null $product_id The product ID.
+     * 
+     * @return array The trending product data.
+     */
     public function get_trending_product_data( $product_id = null ) {
 
         if (! $product_id) {
@@ -678,6 +813,15 @@ class Geovin_Product_Page {
         return $trending;
     }
 
+    /**
+     * Set the default variation for the product based on the trending item.
+     * If Geovin changes the trending items, we want to automatically
+     * update the default variation for the product.
+     * 
+     * @param array $trending The trending item data.
+     * 
+     * @return void
+     */
     public function set_default_variation( $trending ) {
         global $product;
 
@@ -699,6 +843,13 @@ class Geovin_Product_Page {
 
     }
 
+    /**
+     * used by get_trending_product_data() to collect the data for each trending item
+     * 
+     * @param array $trending_item The trending item data.
+     * 
+     * @return array The modified trending item data.
+     */
     public function loop_attribute_rows( $trending_item ) {
         while ( have_rows( 'attributes_to_include' ) ) : the_row();
             if ( get_row_layout() == 'dimensions' ) :
@@ -784,6 +935,11 @@ class Geovin_Product_Page {
         return $trending_item;
     }
 
+    /**
+     * Get all possible attribute combinations that Geovin offers
+     * 
+     * @return array The attribute combinations.
+     */
     public function get_all_attribute_combinations() {
         $combinations = $this->compute_attribute_combinations();
         set_transient('geovin_attribute_combination', $combinations );
@@ -791,6 +947,11 @@ class Geovin_Product_Page {
         return $combinations;
     }
 
+    /**
+     * Compute the attribute combinations based on the ACF field 'combinations'.
+     * 
+     * @return array|false The attribute combinations or false if no combinations found.
+     */
     public function compute_attribute_combinations() {
         $combinations = false;
         if ( have_rows( 'combinations', 'option' ) ) :
@@ -819,10 +980,22 @@ class Geovin_Product_Page {
         return $combinations;
     }
 
+    /**
+     * Clear the attribute combination transient.
+     * This is used to clear the transient when a new combination is saved.
+     * 
+     * @return void
+     */
     public function clear_attribute_combination_transient() {
         delete_transient( 'geovin_attribute_combination' );
     }
 
+    /**
+     * Clear the transient when a new combination is saved.
+     * This is hooked to the 'save_post' action.
+     * 
+     * @return void
+     */
     public function clear_transient_on_combo_save() {
         $screen = get_current_screen();
         if ( $screen->id === "product_page_attribute-combinations" ) {
@@ -830,6 +1003,15 @@ class Geovin_Product_Page {
         }
         
     }
+
+    /**
+     * Get the term by Geovin code.
+     * 
+     * @param string $code The Geovin code.
+     * @param int $position The position of the attribute in the taxonomy.
+     * 
+     * @return WP_Term|false The term object or false if not found.
+     */
     public static function get_term_by_geovin_code( $code, $position ) {
         $taxonomies = array(
             3 => 'pa_dimensions',
@@ -863,6 +1045,13 @@ class Geovin_Product_Page {
         
     }
 
+    /**
+     * Get the Geovin code for a term.
+     * 
+     * @param WP_Term $term The term object.
+     * 
+     * @return string The Geovin code for the term.
+     */
     public function get_term_geovin_code( $term ) {
 
         $taxonomy_prefix = $term->taxonomy;

@@ -3,6 +3,12 @@ namespace Geovin;
 
 class Geovin_Importer {
 
+	/**
+	 * Converts a csv file into an array.
+	 * 
+	 * @param string $file The path to the csv file.
+	 * @return array The data from the csv file as an array.
+	 */
 	public static function import_csv( $file ) {
 		$csv_file = file( $file );
 		$data     = [];
@@ -12,6 +18,13 @@ class Geovin_Importer {
 		return $data;
 	}
 
+	/**
+	 * Converts a two-row header csv file into an array.
+	 * Geovin provides a two-row header csv file
+	 * 
+	 * @param array $data The data from the csv file as an array.
+	 * @return array The headers from the csv file as an array.
+	 */
 	public static function two_row_headers( $data ) {
 		$headers = array();
 		$latest = '';
@@ -25,6 +38,12 @@ class Geovin_Importer {
 		return $headers;
 	}
 
+	/**
+	 * Converts a one-row header csv file into an array.
+	 * 
+	 * @param array $data The data from the csv file as an array.
+	 * @return array The headers from the csv file as an array.
+	 */
 	public static function one_row_headers( $data ) {
 		$headers = array();
 		$latest = '';
@@ -38,6 +57,13 @@ class Geovin_Importer {
 		return $headers;
 	}
 
+	/**
+	 * Converts a csv file into a multi-dimensional array.
+	 * 
+	 * @param array $headers The headers from the csv file as an array.
+	 * @param array $data The data from the csv file as an array.
+	 * @return array The data from the csv file as a multi-dimensional array.
+	 */
 	public static function make_multi_array( $headers, $data ) {
 		$data_array = array();
 		foreach( $data as $i => $line ) {
@@ -48,6 +74,12 @@ class Geovin_Importer {
 		return $data_array;
 	}
 
+	/**
+	 * Groups the data by product SKU.
+	 * 
+	 * @param array $data The data from the csv file as a multi-dimensional array.
+	 * @return array The data grouped by product SKU.
+	 */
 	public static function group_by_product( $data ) {
 		$product_array = array();
 
@@ -175,6 +207,13 @@ class Geovin_Importer {
 		return $product_array;
 	}
 
+	/**
+	 * Get a term based on the code and label.
+	 * 
+	 * @param string $term_code The code of the term.
+	 * @param string $label The label of the term.
+	 * @return object The term object.
+	 */
 	private static function get_term_from_code( $term_code, $label ) {
 		if ( $label === 'Code-03' || $label === 'C03' ) {
 			$taxonomy = 'pa_dimensions';
@@ -213,6 +252,12 @@ class Geovin_Importer {
 		return $term;
 	}
 
+	/**
+	 * Save the spec data to the product.
+	 * 
+	 * @param array $data The data to be saved.
+	 * @return void
+	 */
 	public static function save_spec_data ( $data ) {
 		foreach ( $data as $sku => $value ) {
 			$product_id = wc_get_product_id_by_sku( $sku );
@@ -220,6 +265,12 @@ class Geovin_Importer {
 		}
 	}
 
+	/**
+	 * Save the pricing data to the product.
+	 * 
+	 * @param array $data The data to be saved.
+	 * @return void
+	 */
 	public static function save_pricing_data( $data ) {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$count = count($data);
@@ -266,6 +317,12 @@ class Geovin_Importer {
 		}
 	}
 
+	/**
+	 * Save the USD pricing data to the product.
+	 * 
+	 * @param array $data The data to be saved.
+	 * @return void
+	 */
 	public static function save_us_pricing_data( $data ) {
 		if ( defined( 'WP_CLI' ) && WP_CLI ) {
 			$count = count($data);

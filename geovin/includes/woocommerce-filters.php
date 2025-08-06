@@ -3,6 +3,10 @@
 namespace Geovin;
 
 
+/**
+ * Display the post content in the product description area.
+ * This ensures that the block editor content is displayed on the woo template where we want it.
+ */
 add_action( 'woocommerce_after_single_product_summary', __NAMESPACE__ . '\add_description_content', 10 );
 function add_description_content() {
     ?>
@@ -12,6 +16,9 @@ function add_description_content() {
     <?php
 }
 
+/**
+ * Adds a collection carousel to the product page.
+ */
 add_action( 'woocommerce_after_single_product_summary', __NAMESPACE__ . '\add_collection_carousel', 10 );
 function add_collection_carousel() {
     ?>
@@ -19,13 +26,18 @@ function add_collection_carousel() {
     <?php
 }
 
+/**
+ * Remove the default WooCommerce product tabs.
+ * This is used to remove the tabs that are not needed for Geovin products.
+ */
 add_filter( 'woocommerce_product_tabs', __NAMESPACE__ . '\remove_tabs', 10 );
 function remove_tabs() {
     return array();
 }
 
 /*
- * Remove sidebar from product pages
+ * Remove product tabs and woo policies
+ * Add Geovin privacy policy text
  */
 add_action('plugins_loaded', __NAMESPACE__ . '\template_changes' );
 function template_changes() {
@@ -34,6 +46,9 @@ function template_changes() {
     add_action( 'woocommerce_checkout_terms_and_conditions', __NAMESPACE__ . '\geovin_privacy_policy_text', 20 );
 }
 
+/**
+ * Geovin privacy policy text
+ */
 function geovin_privacy_policy_text() {
     echo '<div class="woocommerce-privacy-policy-text"><small>';
     wc_privacy_policy_text( 'checkout' );
@@ -41,7 +56,7 @@ function geovin_privacy_policy_text() {
 }
 
 /*
- * Filter My Account Sections
+ * Filter My Account Sections in Woo
  */
 add_filter( 'woocommerce_account_menu_items', __NAMESPACE__ . '\remove_my_account_links' );
 function remove_my_account_links( $menu_links ){
@@ -66,7 +81,10 @@ function remove_my_account_links( $menu_links ){
     
 }
 
-// register permalink endpoint
+/*
+ * Add endpoints for My Account pages to allow for
+ * adding, editing, and removing staff members.
+ */
 add_action( 'init', __NAMESPACE__ . '\add_endpoint' );
 function add_endpoint() {
 
@@ -76,6 +94,10 @@ function add_endpoint() {
     add_rewrite_endpoint( 'remove-staff', EP_PAGES );
 
 }
+
+/*
+ * Add content for the new Manage Staff page in My Account.
+ */
 // content for the new page in My Account, woocommerce_account_{ENDPOINT NAME}_endpoint
 add_action( 'woocommerce_account_manage-staff_endpoint', __NAMESPACE__ . '\my_account_manage_staff_content' );
 function my_account_manage_staff_content() {
@@ -131,6 +153,10 @@ function my_account_manage_staff_content() {
     }
 
 }
+
+/*
+ * Add content for the new Add Staff page in My Account.
+ */
 add_action( 'woocommerce_account_add-staff_endpoint', __NAMESPACE__ . '\my_account_add_staff_content' );
 function my_account_add_staff_content() {
 
@@ -146,6 +172,10 @@ function my_account_add_staff_content() {
     }
 }
 
+
+/*
+ * Add content for the new Edit Staff page in My Account.
+ */
 add_action( 'woocommerce_account_edit-staff_endpoint', __NAMESPACE__ . '\my_account_edit_staff_content' );
 function my_account_edit_staff_content() {
     
@@ -159,6 +189,9 @@ function my_account_edit_staff_content() {
     }
 }
 
+/*
+ * Add content for the new Remove Staff page in My Account.
+ */
 add_action( 'woocommerce_account_remove-staff_endpoint', __NAMESPACE__ . '\my_account_remove_staff_content' );
 function my_account_remove_staff_content() {
     
@@ -258,26 +291,40 @@ function product_data_visibility( $post ) {
 <?php
 }
 
-// Disable woocommerce css
+/*
+ * Remove the default WooCommerce styles.
+ */
 add_filter( 'woocommerce_enqueue_styles', '__return_empty_array' );
 
-// To change add to cart text on single product page
+/*
+ * Change the add to cart text on single product pages.
+ */
 add_filter( 'woocommerce_product_single_add_to_cart_text', __NAMESPACE__ . '\woocommerce_custom_single_add_to_cart_text' ); 
 function woocommerce_custom_single_add_to_cart_text() {
     return __( 'Add', 'woocommerce' ); 
 }
 
+/*
+ * Remove the default WooCommerce price display location
+ */
 add_action('init', __NAMESPACE__ . '\move_price');
 function move_price(){
     remove_action('woocommerce_single_product_summary', 'woocommerce_template_single_price', 10);
 }
 
+/*
+ * Remove the default WooCommerce related products section.
+ */
 add_action('init', __NAMESPACE__ . '\remove_related');
 function remove_related(){
     remove_action( 'woocommerce_after_single_product_summary', 'woocommerce_output_related_products', 20 );
 }
 
-//Remove price column as it causes a memory limit error when calcing thousands of variations for downsview
+/*
+ * Remove price column on edit products screens
+ * as it causes a memory limit error when calcing 
+ * thousands of variations for downsview
+ */
 add_filter( 'manage_edit-product_columns', __NAMESPACE__ . '\change_columns_filter',10, 1 );
 function change_columns_filter( $columns ) {
     unset($columns['price']);
@@ -285,6 +332,9 @@ function change_columns_filter( $columns ) {
     return $columns;
 }
 
+/*
+ * Change the order meta that is displayed in the order details.
+ */
 add_filter( 'woocommerce_display_item_meta', __NAMESPACE__ . '\adjust_meta_for_order_details', 10, 3 );
 function adjust_meta_for_order_details( $html, $item, $args ) {
     $strings = array();

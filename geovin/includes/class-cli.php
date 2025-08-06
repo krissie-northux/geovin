@@ -31,7 +31,8 @@ class CLI extends WP_CLI_Command {
 	/**
 	 * Example method to test that commands are registered.
 	 *
-	 * @return void
+	 * ## EXAMPLES
+	 * 	wp ping
 	 */
 	public function ping() {
 		WP_CLI::line( 'pong' );
@@ -39,8 +40,10 @@ class CLI extends WP_CLI_Command {
 
 	/**
 	 * Writes a CSV file of Trending Product SKUs and Links
+	 * 
+	 * ## EXAMPLES
+	 * 	wp export_trending_products
 	 *
-	 * @return void
 	 */
 	public function export_trending_products( $args, $assoc_args ) {
 		$args = array(
@@ -101,11 +104,11 @@ class CLI extends WP_CLI_Command {
 	/**
 	 * Imports CAD pricing data from CSV
 	 *
+	 * ## OPTIONS
+	 * 
 	 * <file>
 	 * :the csv file, relative to the root of the site
 	 *
-	 *
-	 * @return void
 	 */
 	public function import_pricing( $args, $assoc_args ) {
 		$file       = $args[0];
@@ -121,11 +124,11 @@ class CLI extends WP_CLI_Command {
 	/**
 	 * Imports USD pricing data from CSV
 	 *
+	 * ## OPTIONS
+	 * 
 	 * <file>
 	 * :the csv file, relative to the root of the site
 	 *
-	 *
-	 * @return void
 	 */
 	public function import_us_pricing( $args, $assoc_args ) {
 		$file       = $args[0];
@@ -141,11 +144,11 @@ class CLI extends WP_CLI_Command {
 	/**
 	 * Imports variation specs data from CSV
 	 *
+	 * ## OPTIONS
+	 * 
 	 * <file>
 	 * :the csv file, relative to the root of the site
 	 *
-	 *
-	 * @return void
 	 */
 	public function import_specs( $args, $assoc_args ) {
 		$file       = $args[0];

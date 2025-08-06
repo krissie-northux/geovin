@@ -8,6 +8,13 @@ namespace Geovin;
  */
 add_action( 'init', __NAMESPACE__ . '\register_taxonomies', 0 );
  
+
+/**
+ * Register custom taxonomies for the Geovin plugin.
+ * This function registers a 'collections' taxonomy for products.
+ *
+ * @return void
+ */
 function register_taxonomies() {
 	$labels = array(
 		'name' => _x( 'Collections', 'taxonomy general name' ),

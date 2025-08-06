@@ -48,6 +48,11 @@ class Invite_Users {
 
     }
 
+    /**
+     * Load dealer addresses for the select field in the invite staff form.
+     * 
+     * @return void
+     */
     public function load_dealer_addresses() {
         $dealer_id = intval( $_POST['dealer_id'] );
         $dealer_addresses = Geovin_Dealers::get_dealer_addresses( $dealer_id );
@@ -56,6 +61,12 @@ class Invite_Users {
         wp_die();
     }
 
+    /**
+     * get the staff member's full name from the user ID
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's name.
+     */
     public function staff_name_value( $value ) {
         if ( isset($_GET['id']) ) {
             $user = get_user_by('ID',$_GET['id']);
@@ -64,6 +75,12 @@ class Invite_Users {
         return $value;
     }
 
+    /**
+     * get the staff member's first name from the user ID
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's name.
+     */
     public function staff_first_name_value( $value ) {
         if ( isset($_GET['id']) ) {
             $user = get_user_by('ID',$_GET['id']);
@@ -71,6 +88,13 @@ class Invite_Users {
         }
         return $value;
     }
+
+    /**
+     * get the staff member's last name from the user ID
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's name.
+     */
     public function staff_last_name_value( $value ) {
         if ( isset($_GET['id']) ) {
             $user = get_user_by('ID',$_GET['id']);
@@ -79,6 +103,12 @@ class Invite_Users {
         return $value;
     }
 
+    /**
+     * get the staff member's email from the user ID
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's email.
+     */
     public function staff_email_value( $value ) {
         if ( isset($_GET['id']) ) {
             $user = get_user_by('ID',$_GET['id']);
@@ -87,6 +117,12 @@ class Invite_Users {
         return $value;
     }
 
+    /**
+     * get the staff member's role from the user ID
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's name.
+     */
     public function staff_role_value( $value ) {
         if ( isset($_GET['id']) ) {
             $user = get_user_by('ID',$_GET['id']);
@@ -95,6 +131,12 @@ class Invite_Users {
         return $value;
     }
 
+    /**
+     * get the currently logged in user's assigned dealer
+     * 
+     * @param string $value The current value of the field.
+     * @return string The staff member's name.
+     */
     public function dealer_id_value( $value ) {
         $user_id = get_current_user_id();
         $dealer = get_field('related_dealer', 'user_' . $user_id, true);
@@ -102,6 +144,14 @@ class Invite_Users {
         return $value;
     }
 
+    /**
+     * Send the invitation email to the staff selected in the gravity form.
+     * 
+     * @param array $entry The form entry.
+     * @param array $form The form object.
+     * 
+     * @return void
+     */
     public function invite_staff( $entry, $form ) {
         $staff = maybe_unserialize( rgar( $entry, 1 ) );
         $dealer_id = rgar($entry,2);
@@ -121,6 +171,15 @@ class Invite_Users {
   
     }
 
+    /**
+     * Update a staff member's information when the
+     * edit staff form is submitted.
+     * 
+     * @param array $entry The form entry.
+     * @param array $form The form object.
+     * 
+     * @return void
+     */
     public function edit_staff( $entry, $form ) {
         $role = rgar($entry,4);
         $userdata = array(
@@ -136,6 +195,14 @@ class Invite_Users {
         $user_id = wp_insert_user( $userdata );
     }
 
+    /**
+     * Remove a staff member from the dealer.
+     * 
+     * @param array $entry The form entry.
+     * @param array $form The form object.
+     * 
+     * @return void
+     */
     public function remove_staff( $entry, $form ) {
         //remove from dealer
         $user_id = rgar( $entry, 1 );
@@ -146,6 +213,14 @@ class Invite_Users {
         
     }
 
+    /**
+     * Take necessary steps when the add user form is submitted.
+     * 
+     * @param array $entry The form entry.
+     * @param array $form The form object.
+     * 
+     * @return void
+     */
     public function process_new_user( $entry, $form ) {
         $user_email = rgar( $entry, 7 );
         $dealer_id = rgar( $entry, 11 );
@@ -188,6 +263,8 @@ class Invite_Users {
 
     /**
      * Adds a submenu page under users.
+     * 
+     * @return void
      */
     public function register_invite_menu_page() {
         add_users_page(
@@ -199,6 +276,11 @@ class Invite_Users {
         );
     }
 
+    /**
+     * Displays a success message after invites are sent.
+     * 
+     * @return void
+     */
     public function invites_sent_notice() {
         $message = 'Remaining user invites have been sent.';
         if ( empty( self::$existing ) ) {
@@ -211,6 +293,11 @@ class Invite_Users {
         }
     }
 
+    /**
+     * Confirms that the default email copy was updated
+     * 
+     * @return void
+     */
     public function options_updated_notice() {
         $message = 'Your default email copy has been updated.';
         ?>
@@ -218,6 +305,11 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Displays an error notice when no invites were sent.
+     * 
+     * @return void
+     */
     public function no_invites_sent_notice() {
         $message = 'No emails were provided and no invites were sent.';
         ?>
@@ -225,12 +317,24 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Displays an error if there is no dealer selected
+     * 
+     * @return void
+     */
     public function must_assign_to_dealer_notice() {
         $message = 'When inviting users with a role of Dealer Staff or Manager, you must select a Dealer to assign them to.';
         ?>
         <div class="notice notice-error is-dismissible"><p><?php echo $message; ?></p></div>
         <?php
     }
+
+    /**
+     * Displays an error if there is no tier selected
+     * for a new Dealer Manager.
+     * 
+     * @return void
+     */
     public function must_assign_to_tier_notice() {
         $message = 'When inviting users with a role of Dealer Manager and no existing Dealer is assigned, you must select a Pricing Tier to assign them to.';
         ?>
@@ -238,6 +342,12 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Displays an error if no role was selected
+     * when inviting users.
+     * 
+     * @return void
+     */
     public function no_role_selected_notice() {
         $message = 'No role was selected, and no invites have been sent. Please select a role to assign and try again.';
         ?>
@@ -245,6 +355,14 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Displays a notice if the user already exists.
+     * 
+     * @param string $email The email address of the existing user.
+     * @param string|null $name The name of the existing user, if available.
+     * 
+     * @return void
+     */
     public function user_exists_notice( $email, $name = null ) {
         self::$existing[] = $email;
         ?>
@@ -252,6 +370,20 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Sends an invitation email to a user.
+     * 
+     * @param string $email_content The content of the email.
+     * @param string $email_subject The subject of the email.
+     * @param string $email The email address to send the invitation to.
+     * @param string $role The role to assign to the user.
+     * @param int|null $assigned_dealer The ID of the dealer to assign, if applicable.
+     * @param string|null $assigned_address The address to assign, if applicable.
+     * @param string|null $assigned_tier The tier to assign, if applicable.
+     * @param string|null $name The name of the user, if available.
+     * 
+     * @return void
+     */
     public function send_invite_email( $email_content, $email_subject, $email, $role, $assigned_dealer = null, $assigned_address = null, $assigned_tier = null, $name = null ) { 
 
         $current_users_email_content = $email_content;
@@ -304,7 +436,9 @@ class Invite_Users {
     }
 
     /**
-     * Display callback for the submenu page.
+     * The invite users page in the Users Admin menu.
+     * 
+     * @return void
      */
     function invite_users_page_callback() {
 
@@ -462,6 +596,11 @@ class Invite_Users {
         <?php
     }
 
+    /**
+     * Get available roles for the invite users form.
+     * 
+     * @return array The available roles.
+     */
     private function get_roles() {
         global $wp_roles;
 
@@ -485,6 +624,13 @@ class Invite_Users {
 
     }
 
+    /**
+     * Shortcode to display the dealer onboarding page.
+     * 
+     * @param array $args The shortcode attributes.
+     * 
+     * @return string The HTML output of the onboarding page.
+     */
     public function dealer_onboarding_page( $args ) {
         $form_id = $args['form'];
         $email = $_GET['email'];
@@ -534,6 +680,13 @@ class Invite_Users {
         return $validation_result;
     }
 
+    /**
+     * Verify the self-onboarding form submission.
+     * 
+     * @param array $validation_result The validation result.
+     * 
+     * @return array The updated validation result.
+     */
     public function verify_self_onboarding( $validation_result ) {
 
         //find nonce field
@@ -605,7 +758,14 @@ class Invite_Users {
         return $validation_result;
     }
 
-    
+    /**
+     * Change the failed message for the self-onboarding form.
+     * 
+     * @param string $message The default message.
+     * @param array $form The form object.
+     * 
+     * @return string The updated message.
+     */
     function change_failed_message( $message, $form ) {
         return "<div class='validation_error'>There was an issue with your registration. We could not verify the authenticity of your registration link. Please check your link, and try again or contact sales@geovin.com to get a new link.</div>";
     }

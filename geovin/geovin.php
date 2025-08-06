@@ -44,6 +44,11 @@ require get_plugin_dir() . 'includes/class-cart.php';
 
 
 
+/**
+ * Checks if a user is able to build an order.
+ * 
+ * @return bool True if the user can build an order, false otherwise.
+ */
 function user_can_build_order() {
   $has_access = false;
   if ( is_user_logged_in() ) {
@@ -56,6 +61,11 @@ function user_can_build_order() {
   return $has_access;
 }
 
+/**
+ * Checks if a user is able to place an order.
+ * 
+ * @return bool True if the user can place an order, false otherwise.
+ */
 function user_can_place_order() {
   $has_access = false;
   $user = wp_get_current_user();
@@ -65,6 +75,11 @@ function user_can_place_order() {
   return $has_access;
 }
 
+/**
+ * Geovin mini cart markup
+ * 
+ * @return void
+ */
 function geovin_mini_cart( $color = 'white' ) {
   $cartcount = WC()->cart->get_cart_contents_count(); ?>
     <?php if( $cartcount > 0 ) {

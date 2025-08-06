@@ -9,6 +9,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 class Cart {
+
+	/**
+     * Constructor to initialize hooks and filters.
+     */
 	public function __construct() {
 		add_filter( 'woocommerce_form_field', array( $this, 'adjust_billing_fields' ), 1, 4 );
 		add_filter( 'woocommerce_form_field_args', array( $this, 'adjust_field_args' ), 1, 3 );
@@ -73,6 +77,13 @@ class Cart {
 		add_action('wp_ajax_nopriv_update_cart_item_qty', array($this, 'update_cart_item_qty'),10, 1);
 	}
 
+	/**
+     * Update the cart item quantity 
+	 * and the mini cart fragments
+	 * via AJAX
+	 * 
+	 * @return void
+     */
 	public function update_cart_item_qty() {
 		$result = false;
 		$product_id = $_POST['product_id'];
@@ -83,7 +94,7 @@ class Cart {
 	        	$result['success'] = WC()->cart->set_quantity($key, $cart_item['quantity'] + intval($qty));
 	        }
 	    }
-	    if ($result['success']) {
+	    if ( $result['success'] ) {
 	    	ob_start();
 	    	geovin_mini_cart('white');
 	    	$result['fragments']['a.geovin_mini_cart--white'] = ob_get_clean();
@@ -95,6 +106,12 @@ class Cart {
 	    wp_send_json($result);
 	}
 
+	/**
+     * Add mini cart fragments on cart update.
+     *
+     * @param array $fragments The current cart fragments.
+     * @return array Modified cart fragments.
+     */
 	public function add_mini_cart_on_update( $fragments ) {
 		ob_start();
 		geovin_mini_cart('white');
@@ -107,6 +124,14 @@ class Cart {
 		return $fragments;
 	}
 
+	/**
+     * Adjust checkout validation for custom fields
+	 * and specific dealer requirements.
+     *
+     * @param array $fields The checkout fields.
+     * @param object $errors The validation errors.
+	 * @return void
+     */
 	public function validate_checkout( $fields, $errors ) {
 
 		// shipping_address_type
@@ -124,6 +149,13 @@ class Cart {
 
 	}
 
+	 /**
+     * Adjust WooCommerce address fields
+	 * to match user expectations for Geovin Customers
+     *
+     * @param array $fields The default address fields.
+     * @return array Modified address fields.
+     */
 	public function fix_address_fields( $fields ) {
 		$fields['address_1']['label'] = 'address';
 		$fields['address_1']['placeholder'] = 'Number and street name';
@@ -135,12 +167,20 @@ class Cart {
 		return $fields;
 	}
 
+	/**
+     * Update order item details to use a custom image from shapediver
+	 * and a link to the product with the specific attributes selected
+     *
+     * @param string $image The current order item image HTML.
+     * @param object $item The order item object.
+     * @return string Modified order item image HTML.
+     */
 	public function replace_order_item_image( $image, $item ) {
-		$new_image = $item->get_meta('image_to_use');
-		$link = $item->get_meta('link_to_use');
-		$product = $item->get_product();
-		$link          = $product->get_permalink();
-		$attribute_selections =  stripslashes( $item->get_meta('niceatts_to_use') );
+		$new_image            = $item->get_meta('image_to_use');
+		$link                 = $item->get_meta('link_to_use');
+		$product              = $item->get_product();
+		$link                 = $product->get_permalink();
+		$attribute_selections = stripslashes( $item->get_meta('niceatts_to_use') );
 	
 		if ( isset($item['link_to_use']) ) {
 			$link .= '&' . $item['link_to_use'] . '&niceatts=' . urlencode( base64_encode( $attribute_selections ) );
@@ -162,6 +202,15 @@ class Cart {
 		return $image;
 	}
 
+	/**
+     * Save custom cart item meta data to the order.
+     *
+     * @param object $item The order item object.
+     * @param string $cart_item_key The cart item key.
+     * @param array $values The cart item values.
+     * @param object $order The order object.
+	 * @return void
+     */
 	public function save_as_custom_order_item_meta_data( $item, $cart_item_key, $values, $order ) {
 		$keys_to_save = array('image_to_use', 'link_to_use', 'dimensions_to_use', 'niceatts_to_use');
 		foreach( $keys_to_save as $key_to_save ) {
@@ -172,6 +221,13 @@ class Cart {
 	}
 
 	
+	/**
+     * Save a keyed shipping address to the user's saved addresses
+	 * when checkout is completed
+     *
+     * @param string $text The current button text.
+     * @return string Modified button text.
+     */
 	public function save_shipping_addresses_checkout( $order_id, $posted_data, $order ) {
 		$structured_data = array();
 		$address_key = '';
@@ -193,8 +249,16 @@ class Cart {
 		update_user_meta( get_current_user_id(), 'saved_shipping_addresses', $my_addresses );
 	}
 
-
-
+	/**
+	 * Save a keyed shipping address to the user's saved addresses
+	 * when the user saves their address in their account
+	 *
+	 * @param int $user_id The user ID.
+	 * @param bool $load_address Whether to load the address.
+	 * @param array $address The address data.
+	 * @param object $customer The customer object.
+	 * @return void
+	 */
 	public function save_shipping_addresses( $user_id, $load_address, $address, $customer ) {
 		$structured_data = array();
 		$address_key = '';
@@ -215,10 +279,27 @@ class Cart {
 		}
 		update_user_meta( get_current_user_id(), 'saved_shipping_addresses', $my_addresses );
 	}
+
+	/**
+	 * Adjust the button text for the order button
+	 * on checkout to match Geovin's sales process
+	 *
+	 * @param string $text The current button text.
+	 * @return string Modified button text.
+	 */
 	public function filter_button_text( $text ) {
 		return 'Place sales order';
 	}
 
+	/**
+	 * Adjust the email order meta to remove shipping and payment method
+	 * from the order details in the email.
+	 *
+	 * @param array $total_rows The current total rows.
+	 * @param object $order The order object.
+	 * @param string $tax_display The tax display mode.
+	 * @return array Modified total rows.
+	 */
 	public function filter_email_order_meta( $total_rows, $order, $tax_display ) {
 		unset($total_rows['shipping']);
 		unset($total_rows['payment_method']);
@@ -227,6 +308,15 @@ class Cart {
 		return $total_rows;
 	}
 
+	/**
+	 * Pre-populate the billing address fields with the dealer's address
+	 * if we don't already have a billing address set.
+	 *
+	 * @param array $address The current address fields.
+	 * @param int $customer_id The customer ID.
+	 * @param string $address_type The type of address (billing or shipping).
+	 * @return array Modified address fields.
+	 */
 	public function filter_addresses( $address, $customer_id, $address_type ) {
 		
 		$dealer = Geovin_Dealers::get_dealer();
@@ -251,6 +341,14 @@ class Cart {
 		return $address;
 	}
 
+	/**
+	 * Adjust the order item data to include custom attributes
+	 * and dimensions for the Geovin product type.
+	 *
+	 * @param array $item_data The current item data.
+	 * @param array $cart_item The cart item data.
+	 * @return array Modified item data.
+	 */
 	public function add_extra_data( $item_data, $cart_item ) {
 		$atts = json_decode( stripslashes( $cart_item['niceatts_to_use'] ) );
 
@@ -265,6 +363,15 @@ class Cart {
 		return $item_data;
 	}
 
+	/**
+	 * Adjust the permalink for the cart item to include custom attributes
+	 * and a custom image if available.
+	 *
+	 * @param string $permalink The current permalink.
+	 * @param array $cart_item The cart item data.
+	 * @param string $cart_item_key The cart item key.
+	 * @return string Modified permalink.
+	 */
 	public function adjust_permalink( $permalink, $cart_item, $cart_item_key ) {
 		$cart = WC()->session->get('cart');
 		if ( isset($cart_item['link_to_use']) ) {
@@ -295,6 +402,13 @@ class Cart {
 		return $permalink;
 	}
 
+	/**
+	 * Add a custom product SKU to the cart item display.
+	 *
+	 * @param array $cart_item The cart item data.
+	 * @param string $cart_item_key The cart item key.
+	 * @return void
+	 */
 	public function add_product_sku( $cart_item, $cart_item_key ) {
 		$raw_sku = $cart_item['data']->get_data()['sku'];
 		$formatted_sku = str_replace('X', '', $raw_sku);
@@ -302,6 +416,12 @@ class Cart {
 		echo '<br/><span class="code-key">Code Key: ' . $formatted_sku . '</span>';
 	}
 
+	/**
+	 * Format the attributes to present them in a user-friendly way.
+	 *
+	 * @param array $item_data The item data to format.
+	 * @return array Formatted attributes.
+	 */
 	public static function format_atts( $item_data ) {
 		$new_data = array();
 		$dimensions = array();
@@ -433,6 +553,12 @@ class Cart {
 		return $new_data;
 	}
 
+	/**
+	 * Format the order attributes for display in the order summary.
+	 *
+	 * @param array $item_data The item data to format.
+	 * @return array Formatted attributes.
+	 */
 	public static function format_order_atts( $item_data ) {
 		$new_data = array();
 
@@ -453,6 +579,12 @@ class Cart {
 		return $new_data;
 	}
 
+	/**
+	 * Add a meaningful display value for the Fabric attribute
+	 *
+	 * @param array $att cart or order item attribute.
+	 * @return array Modified attributes.
+	 */
 	public static function filter_att_display_value( $att ) {
 		if ( have_rows( 'combinations', 'option' ) ) :
 			while ( have_rows( 'combinations', 'option' ) ) : the_row();
@@ -470,6 +602,13 @@ class Cart {
 		return $att;
 	}
 
+	/**
+	 * Get the Geovin code for a given attribute value and taxonomy.
+	 *
+	 * @param string $att_value The attribute value.
+	 * @param string $tax The taxonomy name.
+	 * @return string The Geovin code.
+	 */
 	public static function get_att_code( $att_value, $tax ) {
 		$term = get_term_by('name', $att_value, $tax);
 		$taxonomy_prefix = $term->taxonomy;
@@ -480,6 +619,15 @@ class Cart {
         return $geovin_code;
 	}
 
+	/**
+	 * Send a copy the sales order to a specific email address
+	 * if entered on checkout.
+	 *
+	 * @param string $recipient the original email for the order.
+	 * @param object $order The order object.
+	 * @param object $email The email object.
+	 * @return string Modified recipient string.
+	 */
 	public function add_copies( $recipient, $order, $email ) {
 		$send_to = $order->get_meta('_billing_sales_order_send_to');
 		if ( $send_to ) {
@@ -488,6 +636,15 @@ class Cart {
 		return $recipient;
 	}
 
+	/**
+	 * Add extra information to the email subject line
+	 * for sales orders, including PO number and tag.
+	 *
+	 * @param string $subject The email subject.
+	 * @param object $order The order object.
+	 * @param object $email The email object.
+	 * @return string Modified subject line.
+	 */
 	public function add_extras( $subject, $order, $email ) {
 		$po = $order->get_meta('_billing_sales_order_po');
 		$tag = $order->get_meta('_billing_sales_order_tag');
@@ -516,6 +673,15 @@ class Cart {
 		return $subject;
 	}
 
+	/**
+	 * Adjust the email heading for new orders to accommodate
+	 * user expectations for Geovin's sales process.
+	 *
+	 * @param string $heading The email heading.
+	 * @param object $order The order object.
+	 * @param object $email The email object.
+	 * @return string Modified email heading.
+	 */
 	public function adjust_email_heading( $heading, $order, $email ) {
 		if ( $email->id === 'new_order' ) {
 			$copy_geovin = $order->get_meta('_billing_sales_order_copy_geovin');
@@ -527,6 +693,12 @@ class Cart {
 		return $heading;
 	}
 
+	/**
+	 * Add custom order fields to the email order summary
+	 *
+	 * @param int $order_id The order ID.
+	 * @return void
+	 */
 	public function add_to_order_summary( $order_id ) {
 		
 		$order = wc_get_order( $order_id );
@@ -555,6 +727,13 @@ class Cart {
 		
 	}
 
+	/**
+	 * Filter the localized script parameters for the address fields
+	 *
+	 * @param array $params The localized script parameters.
+	 * @param string $handle The script handle.
+	 * @return array Modified parameters.
+	 */
 	public function filter_localized_script( $params, $handle ) {
 		if ( $handle === 'wc-address-i18n' ) {
 			$paramlocal_array = json_decode($params['locale']);
@@ -571,6 +750,13 @@ class Cart {
 		return $params;
 	}
 
+	/**
+	 * Add a dropdown to select from saved addresses
+	 * on the checkout page.
+	 *
+	 * @param object $checkout The checkout object.
+	 * @return void
+	 */
 	public function add_address_dropdown( $checkout ) {
 		$dealer = Geovin_Dealers::get_dealer();
 		$addresses = Geovin_Dealers::get_dealer_addresses( $dealer->ID );
@@ -594,6 +780,13 @@ class Cart {
 		echo $select_html;
 	}
 
+	/**
+	 * Add a dropdown to select from saved personal addresses
+	 * on the checkout page.
+	 *
+	 * @param object $checkout The checkout object.
+	 * @return void
+	 */
 	public function add_personal_address_dropdown( $checkout ) {
 		$addresses = get_user_meta( get_current_user_id(), 'saved_shipping_addresses', true );
 		$select_html = '<p class="form-row form-row-wide"><label>Select an Address</label><select class="staff-saved-addresses"><option selected="selected">Add New Address</option>';
@@ -607,6 +800,12 @@ class Cart {
 		echo $select_html;
 	}
 
+	/**
+	 * Display a list of saved addresses
+	 * on the My Account page.
+	 *
+	 * @return void
+	 */
 	public function add_address_list() {
 		$dealer = Geovin_Dealers::get_dealer();
 		$addresses = Geovin_Dealers::get_dealer_addresses( $dealer->ID );
@@ -629,6 +828,12 @@ class Cart {
 		echo $li_html;
 	}
 
+	/**
+	 * Display a list of saved personal addresses
+	 * on the My Account page.
+	 *
+	 * @return void
+	 */
 	public function my_add_address_list() {
 		$addresses = get_user_meta( get_current_user_id(), 'saved_shipping_addresses', true);
 		$li_html = '<ul class="list--unstyle list--my-account-addresses">';
@@ -645,6 +850,15 @@ class Cart {
 		echo $li_html;
 	}
 
+	/**
+	 * Customize the billing and shipping address formats
+	 * to remove the email address and add the full country name.
+	 *
+	 * @param string $address The formatted address.
+	 * @param array $raw_address The raw address data.
+	 * @param object $order The order object.
+	 * @return string Modified address format.
+	 */
 	public function format_billing_address( $address, $raw_address, $order ) {
 		//remove email address showing
 		//add long country
@@ -655,6 +869,15 @@ class Cart {
 		return $address;
 	}
 
+	/**
+	 * Customize the shipping address format
+	 * to include extra fields and the full country name.
+	 *
+	 * @param string $address The formatted address.
+	 * @param array $raw_address The raw address data.
+	 * @param object $order The order object.
+	 * @return string Modified address format.
+	 */
 	public function format_shipping_address( $address, $raw_address, $order ) {
 		$address = '';
 		$shipping_address_name = $order->get_meta('_shipping_address_name');
@@ -734,6 +957,13 @@ class Cart {
 		return $address;
 	}
 
+	/**
+	 * Add custom fields to the checkout page
+	 * for shipping information and sales order details.
+	 *
+	 * @param array $fields The current checkout fields.
+	 * @return array Modified checkout fields.
+	 */
 	public function add_fields( $fields ) {
 
 		$shipping_dealer =  ['shipping_dealer' => array(
@@ -792,6 +1022,13 @@ class Cart {
      	return $fields;
 	}
 
+	/**
+	 * Add custom order fields to the checkout page
+	 * for sales order details.
+	 *
+	 * @param array $fields The current checkout fields.
+	 * @return array Modified checkout fields.
+	 */
 	public function add_order_fields( $fields ) {
 		$fields['order']['billing_sales_order_po'] =  array(
 	        'label'     => __('Sales Order # (optional)', 'woocommerce'),
@@ -829,6 +1066,14 @@ class Cart {
      	return $fields;
 	}
 
+
+	/**
+	 * Remove unnecessary fields from the checkout page
+	 * to streamline the process for Geovin Dealers.
+	 *
+	 * @param array $address_fields The current address fields.
+	 * @return array Modified address fields.
+	 */
 	public function remove_fields( $address_fields ) {
 		unset($address_fields['billing_phone']);
 		unset($address_fields['billing_email']);
@@ -837,13 +1082,27 @@ class Cart {
 		return $address_fields;
 	}
 
+	/**
+	 * Remove unnecessary shipping fields from the checkout page
+	 * to streamline the process for Geovin Dealers.
+	 *
+	 * @param array $address_fields The current address fields.
+	 * @return array Modified address fields.
+	 */
 	public function remove_shipping_fields( $address_fields ) {
 		unset($address_fields['shipping_first_name']);
 
 		return $address_fields;
 	}
 
-	/* Load to get subpremise (apartment, unit number) in map result to save) */
+	/** 
+	 * Enqueue the js necessary so that the ACF map field
+	 * will utilize the google provided subpremise (apartment, unit number) 
+	 * in map result to save) 
+	 * 
+	 * @param string $hook The current admin page hook.
+	 * @return void
+	 */
 	public function add_admin_scripts($hook) {
 
 	    global $parent_file;
@@ -856,8 +1115,17 @@ class Cart {
 	}
 
 
-	/* Make Company Required Field */
-	/* Assign State Country for billing to dealer country */
+	/** 
+	 * Adjust the way the checkout fields are displayed
+	 * to accommodate Geovin Dealers
+	 * Make Company Required Field 
+	 * Assign State Country for billing to dealer country 
+	 * 
+	 * @param array $args The current field arguments.
+	 * @param string $key The field key.
+	 * @param mixed $value The field value.
+	 * @return array Modified field arguments.
+	 */
 	public function adjust_field_args( $args, $key, $value ) {
 
 		if ( $key === 'order_comments' ) {
@@ -887,6 +1155,21 @@ class Cart {
 		return $args;
 	}
 
+	/**
+	 * Adjust the way the checkout fields are displayed
+	 * to accommodate Geovin Dealers
+	 * Populate fields with dealer information where possible
+	 * Make fields not required
+	 * Remove required asterisks and optional text
+	 * Make fields smaller to fit content
+	 * Make shipping address type field disabled
+	 * 
+	 * @param string $field The current field HTML.
+	 * @param string $key The field key.
+	 * @param array $args The field arguments.
+	 * @param mixed $value The field value.
+	 * @return string Modified field HTML.
+	 */
 	public function adjust_billing_fields( $field, $key, $args, $value ) {
 		$dealer = Geovin_Dealers::get_dealer();
 		$dealer_addresses = Geovin_Dealers::get_dealer_addresses( $dealer->ID );

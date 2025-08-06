@@ -16,6 +16,11 @@ class Shapediver {
         add_action( 'woocommerce_single_product_summary', array( $this, 'add_shapediver_container' ), 90 );
     }
 
+    /**
+     * Add custom fields to the product general options area in WooCommerce.
+     * 
+     * @return void
+     */
     public function woo_add_custom_general_fields() {
 
         global $woocommerce, $post;
@@ -45,6 +50,13 @@ class Shapediver {
 
     }
 
+    /**
+     * Save custom fields for Shapediver ticket data on products.
+     * 
+     * @param int $post_id The product ID.
+     * 
+     * @return void
+     */
     public function woo_add_custom_general_fields_save( $post_id ) {
         // ShapeDiver Ticket ID
         if ( isset( $_POST['_sd_ticket'] ) ) {
@@ -55,6 +67,11 @@ class Shapediver {
         }
     }
 
+    /**
+     * Enqueue scripts for Shapediver functionality on product pages.
+     * 
+     * @return void
+     */
     public function enqueue_scripts() {
         if ( is_product() ) {
             wp_enqueue_script( 'shapediver-base', 'https://viewer.shapediver.com/v3/2.12.1/bundle.js', array(), '2.12.1', true );
@@ -63,6 +80,11 @@ class Shapediver {
         }
     }
 
+    /**
+     * Add the Shapediver container to the product page.
+     * 
+     * @return void
+     */
     public function add_shapediver_container() {
         global $product;
         $mattress_toggle = '';
@@ -89,6 +111,11 @@ class Shapediver {
         <?php
     }
 
+    /**
+     * Generate the HTML for the Shapediver controls.
+     * 
+     * @return string The HTML markup for the controls.
+     */
     public function shapediver_controls_html() {
         global $product;
         $attributes = $product->get_attributes();
@@ -131,6 +158,13 @@ class Shapediver {
         return $markup;
     }
 
+    /**
+     * Get the ShapeDiver ticket data for a product.
+     * 
+     * @param int $post_id The product ID.
+     * 
+     * @return string The ShapeDiver ticket ID.
+     */
     public static function get_ticket( $post_id ) {
         $sd_ticket = get_post_meta( $post_id, '_sd_ticket', true );
         return $sd_ticket;

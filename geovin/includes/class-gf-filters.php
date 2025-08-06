@@ -8,10 +8,26 @@ class GF_Filters {
 
 	}
 
+	/**
+	 * Use only specific countries in the Gravity Forms country field.
+	 * 
+	 * @param array $countries The list of countries.
+	 * 
+	 * @return array Filtered list of countries.
+	 */
 	public function use_only_specific_countries( $countries ){
 	    return array( 'CA' => 'Canada', 'US' => 'United States' );
 	}
 
+	/**
+	 * Modify the email notification for the product details form.
+	 * 
+	 * @param array $notification The notification settings.
+	 * @param array $form The form object.
+	 * @param array $entry The entry object.
+	 * 
+	 * @return array Modified notification.
+	 */
 	public function geovin_product_details_email( $notification, $form, $entry ) {
 		$GLOBALS['geovin_prod_email_sending'] = true;
 
@@ -44,8 +60,6 @@ class GF_Filters {
 				$notification['message'] = str_replace('{{Price}}', $price, $notification['message'] );
 			}
 
-
-		
 		$notification['message'] = str_replace('{{Product Link}}', $link, $notification['message'] );
 		$notification['message'] = str_replace('{Product Image:4}', '<img src="' . $image . '" width="600" style="display: block; max-width: 100%; min-width: 100px; width: 100%;"/>', $notification['message'] );
 		$notification['message'] = str_replace('{Selected Attributes:6}', $attribute_text, $notification['message']);
@@ -54,6 +68,17 @@ class GF_Filters {
 	    return $notification;
 	}
 
+	/**
+	 * Resize an image to the specified width and height.
+	 * Used to make custom product images smaller for emails.
+	 * 
+	 * @param string $file The path to the image file.
+	 * @param int $w The desired width.
+	 * @param int $h The desired height.
+	 * @param bool $crop Whether to crop the image.
+	 * 
+	 * @return string The path to the resized image.
+	 */
 	public static function resize_image($file, $w, $h, $crop=FALSE) {
 		list($width, $height) = getimagesize($file);
 		$r = $width / $height;
@@ -79,6 +104,16 @@ class GF_Filters {
 		return $file;
 	}
 
+	/**
+	 * Take the base64 data from Shapediver that was submitted in a hidden
+	 * GF field and save it as a PNG file
+	 * in the uploads directory.
+	 * 
+	 * @param string $base64string The base64 encoded string.
+	 * 
+	 * @return string The URL of the saved PNG file.
+	 * 
+	 */
 	public static function base64_to_png( $base64string ) {
 		$base64_string = $base64string;
 		$upload_dir = wp_upload_dir();

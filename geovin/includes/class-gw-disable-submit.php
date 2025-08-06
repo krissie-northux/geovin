@@ -21,6 +21,13 @@ class GW_Disable_Submit {
 
 	}
 
+	/**
+	 * Check if the script has already been output for this form.
+	 * If not, output the script to handle disabling the submit button.
+	 *
+	 * @param array $form The form object.
+	 * @return array The form object with the script added.
+	 */
 	public function maybe_output_script( $form ) {
 
 		if ( ! self::$script_output ) {
@@ -31,6 +38,14 @@ class GW_Disable_Submit {
 		return $form;
 	}
 
+	/**
+	 * Output the script that will handle disabling the submit button
+	 * until all required fields are filled out.
+	 *
+	 * This script is added to the footer of the form page.
+	 *
+	 * @return void
+	 */
 	public function script() {
 		?>
 
@@ -117,6 +132,12 @@ class GW_Disable_Submit {
 		<?php
 	}
 
+	/**
+	 * Add the initialization script to the form.
+	 * This script will run when the form is rendered and will handle disabling the submit button.
+	 *
+	 * @param array $form The form object.
+	 */
 	public function add_init_script( $form ) {
 
 		$args = array(
@@ -131,6 +152,13 @@ class GW_Disable_Submit {
 
 	}
 
+	/**
+	 * Get the HTML IDs of all required inputs in the form.
+	 * This will be used to determine which inputs to check for required fields.
+	 *
+	 * @param array $form The form object.
+	 * @return array An array of HTML IDs for required inputs.
+	 */
 	public function get_required_input_html_ids( $form ) {
 
 		$html_ids = array();

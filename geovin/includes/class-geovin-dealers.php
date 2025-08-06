@@ -83,6 +83,13 @@ class Geovin_Dealers {
         add_action( 'wp_ajax_nopriv_set_price_shown', array( $this, 'set_price_shown' ) );
     }
 
+    /**
+     * Find the country abbreviation for a given country name
+     * 
+     * @param string $country The full country name
+     * 
+     * @return string|false The country abbreviation or false if not found
+     */
     public static function find_country_abbr( $country ) {
         $countries = WC()->countries->get_countries();
 
@@ -94,6 +101,14 @@ class Geovin_Dealers {
         return false;
     }
 
+    /**
+     * Find the state abbreviation for a given state name and country code
+     * 
+     * @param string $state The full state name
+     * @param string $country The country code
+     * 
+     * @return string|false The state abbreviation or false if not found
+     */
     public static function find_state_abbr( $state, $country ) {
         $states = WC()->countries->get_states( $country );
 
@@ -105,6 +120,15 @@ class Geovin_Dealers {
         return false;
     }
 
+    /**
+     * Save normalized address data to the address field
+     * 
+     * @param array $value The address field value
+     * @param int $post_id The post ID
+     * @param array $field The field array
+     * 
+     * @return array The modified address field value
+     */
     public function save_normalized_address_data( $value, $post_id, $field ) {
 
         $revert_to_main_address = false;
@@ -185,6 +209,13 @@ class Geovin_Dealers {
         return $value;
     }
 
+    /**
+     * Reassign normalized values to main address fields
+     * 
+     * @param array $value The address field value
+     * 
+     * @return array The modified address field value
+     */
     public static function reassign_normalized_values( $value ) {
         if ( ! empty( $value['normalized_address_line_2'] ) ) {
             $value['subpremise'] = $value['normalized_address_line_2'];
@@ -215,6 +246,13 @@ class Geovin_Dealers {
         return $value;
     }
 
+    /**
+     * Get the primary address name assigned to a user
+     * 
+     * @param int $user_id The user ID
+     * 
+     * @return string|false The address name or false if not found
+     */
     public static function get_user_assigned_address( $user_id ) {
         $address_name = false;
         $dealer = self::get_dealer( $user_id );
@@ -232,6 +270,13 @@ class Geovin_Dealers {
 
     }
 
+    /**
+     * Get dealer managers for a given user
+     * 
+     * @param int $user_id The user ID
+     * 
+     * @return array The dealer manager users
+     */
     public static function get_dealer_managers( $user_id = null ) {
         if ( ! $user_id ) {
             //assume we want the logged in user
@@ -259,6 +304,13 @@ class Geovin_Dealers {
 
     }
 
+    /**
+     * Get the dealer for a given user
+     * 
+     * @param int $user_id The user ID
+     * 
+     * @return WP_Post|false The dealer post object or false if not found
+     */
     public static function get_dealer( $user_id = null ) {
         if ( ! $user_id ) {
             //assume we want the logged in user
@@ -269,6 +321,13 @@ class Geovin_Dealers {
         return $dealer;
     }
 
+    /**
+     * Get the addresses for a given dealer
+     * 
+     * @param int $dealer_id The dealer post ID
+     * 
+     * @return array|false The addresses or false if not found
+     */
     public static function get_dealer_addresses( $dealer_id ) {
         $addresses = array();
         // if has rows
@@ -292,6 +351,11 @@ class Geovin_Dealers {
         }
     }
 
+    /**
+     * Get the dealer rate adjustment multiplier
+     * 
+     * @return float The rate adjustment multiplier
+     */
     public static function get_dealers_rate_adjustment() {
         $multiplier = 1;
         if ( user_can_build_order() ) {
@@ -313,6 +377,11 @@ class Geovin_Dealers {
         return $multiplier;
     }
 
+    /**
+     * Set the price shown (MSRP/Cost) in session via ajax
+     * 
+     * @return void
+     */
     public function set_price_shown() {
         // Early initialize customer session
         if ( isset(WC()->session) && ! WC()->session->has_session() ) {
@@ -324,6 +393,11 @@ class Geovin_Dealers {
         wp_die();
     }
 
+    /**
+     * Render the price shown toggle if user is a dealer and not on excluded pages
+     * 
+     * @return void
+     */
     public function maybe_render_pricing_toggle() {
         if ( user_can_build_order() && ! is_page( self::$excluded_price_toggle_pages ) ) {
             wp_enqueue_script('geovin-pricing-toggle', get_plugin_url() . 'assets/js/pricing-toggle.js', array('jquery'), '1', true );
@@ -340,6 +414,14 @@ class Geovin_Dealers {
         
     }
 
+
+    /**
+     * Filter the cart prices for the dealers rate adjustment
+     * 
+     * @param WC_Cart $cart The WooCommerce cart object
+     * 
+     * @return void
+     */
     public function maybe_filter_cart_price_for_dealers( $cart ) {
 
         if ( self::$price_shown === 'MSRP' ) {
@@ -354,7 +436,7 @@ class Geovin_Dealers {
             return;
         }
      
-        // LOOP THROUGH CART ITEMS & APPLY 20% DISCOUNT
+        // LOOP THROUGH CART ITEMS & APPLY DISCOUNT
         foreach ( $cart->get_cart() as $cart_item_key => $cart_item ) {
             $product = $cart_item['data'];
             $price = $product->get_price();
@@ -364,15 +446,38 @@ class Geovin_Dealers {
      
     }
 
+    /**
+     * Add formatting to cart totals to indicate price type
+     * 
+     * @param string $value The cart total HTML
+     * 
+     * @return string The modified cart total HTML
+     */
     public function add_formatting_to_cart_totals( $value ) {
         return $value . ' (' . self::$price_shown . ')';
     }
 
+    /**
+     * Add formatting to cart subtotal to indicate price type
+     * 
+     * @param string $cart_subtotal The cart subtotal HTML
+     * @param bool $compound Whether the subtotal is compound
+     * @param WC_Cart $cart The WooCommerce cart object
+     * 
+     * @return string The modified cart subtotal HTML
+     */
     public function add_formatting_to_cart_subtotals( $cart_subtotal, $compound, $cart ) {
         $price_label = self::$price_shown === 'COST' ? 'Dealer Cost' : self::$price_shown;
         return '(' . $price_label . ') ' . $cart_subtotal;
     }
 
+    /**
+     * Check the referer URL for excluded paths
+     * 
+     * @param string $referer The referer URL
+     * 
+     * @return bool True if the referer contains an excluded path, false otherwise
+     */
     private static function check_referer_for_exclusion( $referer ) {
         foreach( self::$excluded_price_toggle_paths as $page ) {
             if ( strpos($referer, $page) !== false ) {
@@ -382,6 +487,11 @@ class Geovin_Dealers {
         return false;
     }
 
+    /**
+     * Check and set the price shown (MSRP/Cost) in session
+     * 
+     * @return string The price shown
+     */
     public function check_price_shown() {
         $price_shown = false;
 
@@ -412,6 +522,17 @@ class Geovin_Dealers {
         
     }
 
+    /**
+     * Maybe adjust the price for dealers based on the dealers rate adjustment
+     * AND what price is being shown (MSRP/Cost)
+     * 
+     * @param float $return_price The original price
+     * @param int $qty The quantity
+     * @param WC_Product $product The product object
+     * @param string $context The context (default: 'product')
+     * 
+     * @return float The adjusted price
+     */
     public function maybe_adjust_price_for_dealers( $return_price, $qty, $product, $context = 'product' ) {
         if ( self::$price_shown === 'MSRP' ) {
             return $return_price;
@@ -424,6 +545,11 @@ class Geovin_Dealers {
         return $return_price;
     }
 
+    /**
+     * Create the dealer custom post type
+     * 
+     * @return void
+     */
     public function create_dealer_cpt() {
         $labels = array(
             'name'               => _x( 'Dealers', 'post type general name', 'geovin' ),
@@ -463,6 +589,11 @@ class Geovin_Dealers {
         register_post_type( 'geovin_dealer', $args );
     }
 
+    /**
+     * Create the pricing tier taxonomy
+     * 
+     * @return void
+     */
     public function create_pricing_teir_taxonomy() {
         $labels = array(
             'name'          => _x( 'Pricing Tiers', 'taxonomy general name', 'geovin' ),
@@ -489,6 +620,14 @@ class Geovin_Dealers {
         register_taxonomy( 'pricing-tier', 'geovin_dealer', $args );
     }
 
+    /**
+     * Custom meta box to use radio buttons for pricing tier selection
+     * 
+     * @param WP_Post $post The post object
+     * @param array $meta_box_properties The meta box properties
+     * 
+     * @return void
+     */
     public function pricing_tier_meta_box($post, $meta_box_properties){
           $taxonomy = $meta_box_properties['args']['taxonomy'];
           $tax = get_taxonomy($taxonomy);
@@ -516,6 +655,11 @@ class Geovin_Dealers {
         <?php
     }
 
+    /**
+     * Get all pricing tiers
+     * 
+     * @return array The pricing tiers
+     */
     public static function get_pricing_tiers() {
         $tiers = get_terms([
             'taxonomy' => 'pricing-tier',
@@ -525,6 +669,11 @@ class Geovin_Dealers {
         return $tiers;
     }
 
+    /**
+     * Get all dealers
+     * 
+     * @return array The dealer posts
+     */
     public static function get_dealers() {
         $dealers = get_posts([
           'post_type' => 'geovin_dealer',
@@ -537,6 +686,13 @@ class Geovin_Dealers {
         return $dealers;
     }
 
+    /**
+     * Get the available address choices for the dealer
+     * and load into the ACF select field
+     * 
+     * @param array $field The ACF field array
+     * @return array The modified ACF field array
+     */
     public function acf_load_address_choices( $field ) {
         // reset choices
         $field['choices'] = array();
@@ -558,6 +714,12 @@ class Geovin_Dealers {
         return $field;
     }
 
+    /**
+     * Show the Dealer's name in the user relationship field
+     * 
+     * @param array $field The value to be saved
+     * @return array The modified value
+     */
     public function acf_link_new_user_for_dealer( $field ) {
         global $post;
         if ( $post && strpos( $field['instructions'], '{{post_id}}' ) !== false ) {
@@ -566,12 +728,24 @@ class Geovin_Dealers {
         return $field;
     }
 
+    /**
+     * Add the Dealer's ID to the new user creation form
+     * 
+     * @return void
+     */
     public function load_new_user_with_dealer_data() {
         if ( is_admin() && isset( $_GET['dealer'] ) ) {
             $_POST['createuser'] = true;
         }
     }
 
+    /**
+     * Set the default role to dealer_staff when 
+     * adding a user from the dealer edit screen
+     * 
+     * @param array $roles The available roles
+     * @return array The modified roles
+     */
     public function filter_default_role_when_adding_dealer_user( $roles ) {
         
         if ( isset( $_GET['dealer'] ) ) {
@@ -581,6 +755,12 @@ class Geovin_Dealers {
         return $roles;
     }
 
+    /**
+     * Limit the available roles when adding a user from the dealer edit screen
+     * 
+     * @param array $all_roles The available roles
+     * @return array The modified roles
+     */
     public function filter_available_roles( $all_roles ) {
         if ( is_admin() && isset( $_GET['dealer'] ) ) {
             unset( $all_roles['administrator'] );
@@ -595,9 +775,11 @@ class Geovin_Dealers {
         return $all_roles;
     }
 
-    /*
+    /**
      * Adds CSS to hide the website field when creating a new user
      * Used with the 'admin_head-user-new.php' filter
+     * 
+     * @return void
      */
     public function hide_website_field_css() {
         if ( is_admin() && isset( $_GET['dealer'] ) ) {
@@ -605,9 +787,13 @@ class Geovin_Dealers {
         }
     }
 
-    /*
+    /**
      * When editing a Dealer CPT add the old value to $GLOBALS so we can reference it in a function that fires later
      * ACF update_value filter does not acurately track a repeaters old values, this is the work around
+     * 
+     * @param array $data The post data
+     * @param array $postarr The original post data
+     * @return array The modified post data
      */
     public function filter_save( $data, $postarr ) {
         if ( $postarr['post_type'] === 'geovin_dealer' ) {
@@ -628,8 +814,19 @@ class Geovin_Dealers {
         return $data;
     }
 
-    /*
-     * Add address to dealer
+    /**
+     * Saves address to dealer
+     * 
+     * @param int $dealer_id The dealer post ID
+     * @param string $address_1 The first line of the address
+     * @param string $address_2 The second line of the address
+     * @param string $city The city
+     * @param string $province The province/state
+     * @param string $post_code The postal/zip code
+     * @param string $country The country
+     * @param string $address_name The name of the address (default: 'Primary')
+     * 
+     * @return void
      */
     public static function add_primary_address_to_dealer( $dealer_id, $address_1, $address_2, $city, $province, $post_code, $country, $address_name = 'Primary' ) {
         $rows = array(
@@ -649,16 +846,27 @@ class Geovin_Dealers {
         update_field('addresses', $rows, $dealer_id );
     }
 
-    /*
-     * Add dealer to user
+    /**
+     * Saves dealer to user
+     * 
+     * @param int $user_id The user ID
+     * @param int $dealer_id The dealer post ID
+     * 
+     * @return void
      */
     public static function add_dealer_to_user( $user_id, $dealer_id ) {
         $dealer = get_post( $dealer_id );
         update_field( 'related_dealer', $dealer, 'user_' . $user_id );
     }
 
-    /*
-     * Add user to dealer
+    /**
+     * Saves user to dealer
+     * 
+     * @param int $user_id The user ID
+     * @param int $dealer_id The dealer post ID
+     * @param string|null $address_to_assign The address name to assign to the user (optional)
+     * 
+     * @return void
      */
     public static function add_user_to_dealer( $user_id, $dealer_id, $address_to_assign = null ) {
         $row = array(
@@ -670,8 +878,13 @@ class Geovin_Dealers {
         add_row( 'managers_and_staff', $row, $dealer_id );
     }
 
-    /*
+    /**
      * Remove user from dealer
+     * 
+     * @param int $user_id The user ID
+     * @param int $dealer_id The dealer post ID
+     * 
+     * @return void
      */
     public static function remove_user_from_dealer( $user_id, $dealer_id ) {
 
@@ -688,8 +901,12 @@ class Geovin_Dealers {
         }
     }
 
-    /*
+    /**
      * Remove dealer from user
+     * 
+     * @param int $user The user ID
+     * 
+     * @return void
      */
     public static function remove_dealer_from_user( $user ) {
         update_field( 'related_dealer', '', 'user_' . $user );
@@ -697,14 +914,23 @@ class Geovin_Dealers {
 
     /*
      * If user has this dealer
+     * 
+     * TODO: Not implemented
      */
 
     /*
      * If dealer has this user
+     * 
+     * TODO: Not implemented
      */
 
-    /*
+    /**
      * Get dealer's users
+     * 
+     * @param int $dealer_id The dealer post ID
+     * @param int|bool $field_count The number of rows in the managers_and_staff repeater (optional)
+     * 
+     * @return array The user IDs
      */
     public static function get_dealer_users( $dealer_id, $field_count = false ) {
         $field_count = ! $field_count ? count( get_field('managers_and_staff', $dealer_id, false) ) : $field_count;
@@ -716,8 +942,13 @@ class Geovin_Dealers {
         return $users;
     }
 
-    /*
+    /**
      * Update user address from dealer address if user has none specified
+     * 
+     * @param int $dealer_id The dealer post ID
+     * @param int $user_id The user ID
+     * 
+     * @return void
      */
     public static function add_dealer_country_to_user( $dealer_id, $user_id ) {
         $address_count = get_field('addresses', $dealer_id);
@@ -734,10 +965,16 @@ class Geovin_Dealers {
         }
     }
 
-    /*
+    /**
      * Keeps the user/dealer relationship data in sync when either field is changed
      * Important that both fields use the same function for the purpose of referencing locks and
      * preventing loops
+     * 
+     * @param mixed $value The value to be saved
+     * @param int|string $post_id The post ID or 'user_{id}' for users
+     * @param array $field The ACF field array
+     * 
+     * @return mixed The value to be saved
      */
     function bidirectional_acf_relationship( $value, $post_id, $field  ) {
         // vars refer to reciprocal field names
