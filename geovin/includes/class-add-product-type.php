@@ -73,10 +73,10 @@ class Add_Product_Type {
      * @return array Modified cart item data.
      */
     public function add_cart_image_data( $cart_item_data, $product_id, $variation_id, $quantity ) {
-        $cart_item_data['image_to_use'] = $_REQUEST['cart_image_to_use'];
-        $cart_item_data['link_to_use'] = $_REQUEST['cart_link_to_use'];
-        $cart_item_data['dimensions_to_use'] = $_REQUEST['cart_dimensions_to_use'];
-        $cart_item_data['niceatts_to_use'] = $_REQUEST['cart_niceatts_to_use'];
+        $cart_item_data['image_to_use'] = filter_input( INPUT_POST, 'cart_image_to_use', FILTER_SANITIZE_URL );
+        $cart_item_data['link_to_use'] = filter_input( INPUT_POST, 'cart_link_to_use', FILTER_SANITIZE_URL );
+        $cart_item_data['dimensions_to_use'] = filter_input( INPUT_POST, 'cart_dimensions_to_use', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
+        $cart_item_data['niceatts_to_use'] = filter_input( INPUT_POST, 'cart_niceatts_to_use', FILTER_SANITIZE_FULL_SPECIAL_CHARS );
 
         return $cart_item_data;
     }

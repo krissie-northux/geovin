@@ -449,14 +449,14 @@ class Invite_Users {
                 403
             );
         }
-        if ( isset( $_REQUEST['action'] ) && 'inviteusers' === $_REQUEST['action'] ) {
+        if ( isset( $_REQUEST['action'] ) && 'inviteusers' === filter_input( INPUT_POST, 'action', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) ) {
             check_admin_referer( 'invite-users', '_wpnonce_invite-users' );
 
             $email_content = $_POST['email_copy'];
             $email_subject = $_POST['email_subject'];
 
             //Save the Default Email Message if Checked
-            if ( isset( $_POST['save_default'] ) && $_POST['save_default'] === 'on' ) {
+            if ( isset( $_POST['save_default'] ) && filter_input( INPUT_POST, 'save_default', FILTER_SANITIZE_FULL_SPECIAL_CHARS ) === 'on' ) {
                 update_option('geovin_email_invite_copy', $email_content );
                 update_option('geovin_email_invite_subject', $email_subject );
                 add_action( 'geovin_admin_notices', array( $this, 'options_updated_notice' ) );
