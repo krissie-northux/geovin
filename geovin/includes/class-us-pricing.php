@@ -53,9 +53,9 @@ class US_Pricing {
 	 */
 	public function display_country() {
 		$country = Geolocation::get_pricing_country();
-		echo 'Geolocation Country is: ' . $country;
+		echo 'Geolocation Country is: ' . esc_html( $country );
 		if ( WC()->session ) {
-	        echo ' Outside 750km: ' . WC()->session->get('outside_range');
+	        echo ' Outside 750km: ' . esc_html( WC()->session->get('outside_range') );
 	    }
 	}
 

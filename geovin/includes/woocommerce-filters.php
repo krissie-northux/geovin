@@ -126,14 +126,14 @@ function my_account_manage_staff_content() {
             if ( $staff_person == get_current_user_id() ) {
                 $staff_user = get_user_by( 'ID', $staff_person );
                 $staff_role = $staff_user->roles[0] === 'dealer_manager' ? 'Manager' : 'Staff';
-                echo '<tr><td data-title="Name">' . $staff_user->first_name . ' ' . $staff_user->last_name . '</td><td data-title="Email">'.$staff_user->user_email.'</td><td data-title="Role">' . $staff_role . '</td><td data-title="Edit"><a href="/my-account/edit-staff/?id='.$staff_user->ID.'">Edit</a></td><td data-title="Remove">&nbsp;</td></tr>';
+                echo '<tr><td data-title="Name">' . esc_html( $staff_user->first_name ) . ' ' . esc_html( $staff_user->last_name ) . '</td><td data-title="Email">' . esc_html( $staff_user->user_email ) . '</td><td data-title="Role">' . esc_html( $staff_role ) . '</td><td data-title="Edit"><a href="/my-account/edit-staff/?id=' . esc_url( $staff_user->ID ) . '">Edit</a></td><td data-title="Remove">&nbsp;</td></tr>';
                
             } else {
                 $staff_user = get_user_by( 'ID', $staff_person );
 
                 if ( $staff_user ) {
                     $staff_role = $staff_user->roles[0] === 'dealer_manager' ? 'Manager' : 'Staff';
-                echo '<tr><td data-title="Name">' . $staff_user->first_name . ' ' . $staff_user->last_name . '</td><td data-title="Email">'.$staff_user->user_email.'</td><td data-title="Role">' . $staff_role . '</td><td data-title="Edit"><a href="/my-account/edit-staff/?id='.$staff_user->ID.'">Edit</a></td><td data-title="Remove"><a href="/my-account/remove-staff/?id='.$staff_user->ID.'">Remove</a></td></tr>';
+                echo '<tr><td data-title="Name">' . esc_html( $staff_user->first_name ) . ' ' . esc_html( $staff_user->last_name ) . '</td><td data-title="Email">' . esc_html( $staff_user->user_email) . '</td><td data-title="Role">' . esc_html( $staff_role ) . '</td><td data-title="Edit"><a href="/my-account/edit-staff/?id=' . esc_url( $staff_user->ID ) . '">Edit</a></td><td data-title="Remove"><a href="/my-account/remove-staff/?id=' . esc_url( $staff_user->ID ) . '">Remove</a></td></tr>';
                  }
             }
             

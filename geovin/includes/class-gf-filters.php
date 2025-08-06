@@ -61,7 +61,7 @@ class GF_Filters {
 			}
 
 		$notification['message'] = str_replace('{{Product Link}}', $link, $notification['message'] );
-		$notification['message'] = str_replace('{Product Image:4}', '<img src="' . $image . '" width="600" style="display: block; max-width: 100%; min-width: 100px; width: 100%;"/>', $notification['message'] );
+		$notification['message'] = str_replace('{Product Image:4}', '<img src="' . esc_attr( $image ) . '" width="600" style="display: block; max-width: 100%; min-width: 100px; width: 100%;"/>', $notification['message'] );
 		$notification['message'] = str_replace('{Selected Attributes:6}', $attribute_text, $notification['message']);
 
 	 	$GLOBALS['geovin_prod_email_sending'] = false;

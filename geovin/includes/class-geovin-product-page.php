@@ -336,7 +336,7 @@ class Geovin_Product_Page {
             $primary_term = $terms[0];
 
             echo '<div class="pretitle">';
-            echo 'See more <a href="/category/' . $primary_term->slug . '">' . $primary_term->name . '</a>';
+            echo 'See more <a href="/category/' . esc_url( $primary_term->slug ) . '">' . esc_html( $primary_term->name ) . '</a>';
             echo '</div>';
         } else {
             $taxonomy = 'collections'; // <== Here set your custom taxonomy
@@ -344,7 +344,7 @@ class Geovin_Product_Page {
             $primary_term = $terms[0];
 
             echo '<div class="pretitle">';
-            echo 'See more in the <a href="/collection/' . $primary_term->slug . '">' . $primary_term->name . ' Collection</a>';
+            echo 'See more in the <a href="/collection/' . esc_url( $primary_term->slug ) . '">' . esc_html( $primary_term->name ) . ' Collection</a>';
             echo '</div>';
         }
         
@@ -504,7 +504,7 @@ class Geovin_Product_Page {
         $trending = $this->get_trending_product_data();
         $tab_count = get_field('number_of_trending_items');
         ?>
-        <div class="tabs__nav tabs__nav--count-<?php echo $tab_count; ?>">
+        <div class="tabs__nav tabs__nav--count-<?php echo esc_attr( $tab_count ); ?>">
             <ul>
                 <?php foreach( $trending as $key => $trending_item ) {
                     error_log(print_r($key,true));
@@ -513,7 +513,7 @@ class Geovin_Product_Page {
                     }
                 $data_string = $this->create_data_attr_for_trending( $trending_item );
                 ?>
-                    <li class="tabs__nav__item" data-tab="tab-<?php echo $key; ?>" <?php echo $data_string; ?>>Trending <?php echo $key; ?></li>  
+                    <li class="tabs__nav__item" data-tab="tab-<?php echo esc_attr( $key ); ?>" <?php echo esc_attr( $data_string ); ?>>Trending <?php echo esc_html( $key ); ?></li>  
                 <?php } ?>
                 
             </ul>
@@ -531,7 +531,7 @@ class Geovin_Product_Page {
         $sku_code = array();
         
         ?>
-        <div class="tabs" data-product-sku="<?php echo $product->get_sku(); ?>">
+        <div class="tabs" data-product-sku="<?php echo esc_attr( $product->get_sku() ); ?>">
             <?php
                 $trending = $this->get_trending_product_data();
                 $tab_count = count($trending);
@@ -544,7 +544,7 @@ class Geovin_Product_Page {
                 if ( $shapediver_ticket ) {
                     ?>
                     <script>
-                        var sd_ticket = '<?php echo $shapediver_ticket; ?>';
+                        var sd_ticket = '<?php echo esc_html( $shapediver_ticket ); ?>';
                         var available_attributes = JSON.parse( '<?php echo json_encode( $available_attributes ); ?>' );
                     </script>
                     <?php
@@ -560,7 +560,7 @@ class Geovin_Product_Page {
                     <h3 class="title">Options Shown</h3>
                 </div>
                 <?php foreach( $trending as $key => $trending_item ) { ?>
-                    <div id="tab-<?php echo $key; ?>" class="tabs__tab"><?php $this->tab_content( $trending_item, $available_attributes ); ?></div>
+                    <div id="tab-<?php echo esc_attr( $key ); ?>" class="tabs__tab"><?php $this->tab_content( $trending_item, $available_attributes ); ?></div>
                 <?php } ?>
                 <?php if ( $shapediver_ticket ) { ?>
                     <div id="tab-sd" class="tabs__tab"><?php $this->customization_tab_content( $available_attributes ); ?></div>
@@ -691,16 +691,16 @@ class Geovin_Product_Page {
                     $image = isset( $attribute_combos[$attribute_name][$combo_code]['image'] ) ? $attribute_combos[$attribute_name][$combo_code]['image'] : false;
                     ?>
                     <?php if ( $attribute_pretty_name === 'dimensions' && has_term('beds','product_cat') ) {
-                                echo '<span class="bed-size"><strong>Bed Size:</strong> ' . $label . '</span>';
+                                echo '<span class="bed-size"><strong>Bed Size:</strong> ' . esc_html( $label ) . '</span>';
                             } ?>
-                    <strong><?php echo ucwords( $attribute_pretty_name ); ?>:</strong><br/>
-                    <div class="product-attribute-selected product-attribute-selected--thumb" data-thumb="<?php echo $image; ?>">
+                    <strong><?php echo esc_html( ucwords( $attribute_pretty_name ) ); ?>:</strong><br/>
+                    <div class="product-attribute-selected product-attribute-selected--thumb" data-thumb="<?php echo esc_attr( $image ); ?>">
                         <?php if( $attribute_pretty_name != 'dimensions' && $attribute_pretty_name != 'base finish' && $attribute_pretty_name != 'headboard panel'): ?>
                             <div class="quickview__icon">
                                 <svg class="icon-svg--view"><use xlink:href="#icon-view"></use></svg>
                                 <div class="quickview__details">
-                                    <div class="label"><?php echo $label; ?> &#8212 <span class="small-caps"><?php echo $combo_code; ?></span></div>
-                                    <img src="<?php echo $image; ?>"/>
+                                    <div class="label"><?php echo esc_html( $label ); ?> &#8212 <span class="small-caps"><?php echo esc_html( $combo_code ); ?></span></div>
+                                    <img src="<?php echo esc_attr( $image ); ?>"/>
                                     
                                 </div>
                             </div>
@@ -710,7 +710,7 @@ class Geovin_Product_Page {
                             
                             echo do_shortcode('<span class="js-selected-text">[dynamic_spec spec="overall, w" convert="cm"]W x [dynamic_spec spec="overall, d" convert="cm"]D x [dynamic_spec spec="overall, h" convert="cm"]H cm / [dynamic_spec spec="overall, w" convert="in"]W x [dynamic_spec spec="overall, d" convert="in"]D x [dynamic_spec spec="overall, h" convert="in"]H inches</span>');
                         } else {
-                            echo '<span class="js-selected-text">' . $label . ' &#8212 <span class="small-caps">' . $combo_code . '</span></span>';
+                            echo '<span class="js-selected-text">' . esc_html( $label ) . ' &#8212 <span class="small-caps">' . esc_html( $combo_code ) . '</span></span>';
                         } ?>
                         
                     </div>
@@ -718,7 +718,7 @@ class Geovin_Product_Page {
                     <?php
                 } else {
                     ?>
-                    <span class="product-attribute-selected js-selected-text"><?php echo $attribute_value; ?></span>
+                    <span class="product-attribute-selected js-selected-text"><?php echo esc_html( $attribute_value ); ?></span>
                     <?php
                 } ?>
             </div>
@@ -749,10 +749,10 @@ class Geovin_Product_Page {
                 //only one value is x
             } else {
             ?>
-                <p class="<?php echo $key; ?> js-selected-text__parent <?php echo ($pretty_name === 'Dimensions') ? 'quickview' : ''; ?>">
+                <p class="<?php echo esc_attr( $key ); ?> js-selected-text__parent <?php echo ($pretty_name === 'Dimensions') ? 'quickview' : ''; ?>">
 
-                    <strong><?php echo $pretty_name; ?>:</strong><br/>
-                    <span class="<?php echo $hidden; ?> product-attribute-selected product-attribute-selected--thumb product-attribute-selected--empty" data-thumb=""><span class="js-selected-text <?php echo $hidden; ?>"><span class="name"></span> - <span class="small-caps"></span></span></span>
+                    <strong><?php echo esc_html( $pretty_name ); ?>:</strong><br/>
+                    <span class="<?php echo esc_attr( $hidden ); ?> product-attribute-selected product-attribute-selected--thumb product-attribute-selected--empty" data-thumb=""><span class="js-selected-text <?php echo esc_attr( $hidden ); ?>"><span class="name"></span> - <span class="small-caps"></span></span></span>
                     <?php if ( $pretty_name === 'Dimensions' ) {
                         echo do_shortcode('<span class="js-selected-text">[dynamic_spec spec="overall, w" convert="cm"]W x [dynamic_spec spec="overall, d" convert="cm"]D x [dynamic_spec spec="overall, h" convert="cm"]H cm / [dynamic_spec spec="overall, w" convert="in"]W x [dynamic_spec spec="overall, d" convert="in"]D x [dynamic_spec spec="overall, h" convert="in"]H inches</span>');
                     } ?>

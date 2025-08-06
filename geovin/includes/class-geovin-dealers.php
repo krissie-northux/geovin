@@ -637,17 +637,17 @@ class Geovin_Dealers {
           $current = ($postterms ? array_pop($postterms) : false);
           $current = ($current ? $current->term_id : 0);
         ?>
-        <div id="taxonomy-<?php echo $taxonomy; ?>" class="categorydiv">
-          <ul id="<?php echo $taxonomy; ?>-tabs" class="category-tabs">
-            <li class="tabs"><a href="#<?php echo $taxonomy; ?>-all"><?php echo $tax->labels->all_items; ?></a></li>
+        <div id="taxonomy-<?php echo esc_attr( $taxonomy ); ?>" class="categorydiv">
+          <ul id="<?php echo esc_attr( $taxonomy ); ?>-tabs" class="category-tabs">
+            <li class="tabs"><a href="#<?php echo esc_attr( $taxonomy ); ?>-all"><?php echo esc_html( $tax->labels->all_items ); ?></a></li>
           </ul>
 
-          <div id="<?php echo $taxonomy; ?>-all" class="tabs-panel">
-            <input name="tax_input[<?php echo $taxonomy; ?>][]" value="0" type="hidden">            
-            <ul id="<?php echo $taxonomy; ?>checklist" data-wp-lists="list:symbol" class="categorychecklist form-no-clear">
+          <div id="<?php echo esc_attr( $taxonomy ); ?>-all" class="tabs-panel">
+            <input name="tax_input[<?php echo esc_attr( $taxonomy ); ?>][]" value="0" type="hidden">            
+            <ul id="<?php echo esc_attr( $taxonomy ); ?>checklist" data-wp-lists="list:symbol" class="categorychecklist form-no-clear">
         <?php   foreach($terms as $term){
               $id = $taxonomy.'-'.$term->term_id;?>
-              <li id="<?php echo $id?>"><label class="selectit"><input value="<?php echo $term->term_id; ?>" name="tax_input[<?php echo $taxonomy; ?>][]" id="in-<?php echo $id; ?>"<?php if( $current === (int)$term->term_id ){?> checked="checked"<?php } ?> type="radio"> <?php echo $term->name; ?></label></li>
+              <li id="<?php echo esc_attr( $id ); ?>"><label class="selectit"><input value="<?php echo esc_attr( $term->term_id ); ?>" name="tax_input[<?php echo esc_attr( $taxonomy ); ?>][]" id="in-<?php echo esc_attr( $id ); ?>"<?php if( $current === (int)$term->term_id ){?> checked="checked"<?php } ?> type="radio"> <?php echo esc_html( $term->name ); ?></label></li>
         <?php   }?>
             </ul>
           </div>

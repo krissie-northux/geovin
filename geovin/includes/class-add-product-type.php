@@ -57,7 +57,7 @@ class Add_Product_Type {
      */
     public function adjust_cart_thumb( $image, $cart_item, $cart_item_key ) {
         if ( isset( $cart_item['image_to_use'] ) && $cart_item['image_to_use'] !== '' ) {
-            $image = '<img width="300" height="300" src="' . $cart_item['image_to_use'] . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" loading="lazy" />';
+            $image = '<img width="300" height="300" src="' . esc_attr( $cart_item['image_to_use'] ) . '" class="attachment-woocommerce_thumbnail size-woocommerce_thumbnail" alt="" loading="lazy" />';
         }
         return $image;
     }

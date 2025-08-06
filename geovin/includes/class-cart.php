@@ -195,9 +195,9 @@ class Cart {
             	$link .= '&image=' . $new_image;
             }
             
-            $image = '<a href="' . $link . '"><img width="100" height="100" src="' . $new_image . '" class="attachment-100x100 size-100x100" /></a>';
+            $image = '<a href="' . esc_url( $link ) . '"><img width="100" height="100" src="' . esc_attr( $new_image ) . '" class="attachment-100x100 size-100x100" /></a>';
 		} else {
-			$image = '<a href="' . $link . '">' . str_replace('32','100',$image) . '</a>';
+			$image = '<a href="' . esc_url( $link ) . '">' . str_replace('32','100',$image) . '</a>';
 		}
 		return $image;
 	}
@@ -413,7 +413,7 @@ class Cart {
 		$raw_sku = $cart_item['data']->get_data()['sku'];
 		$formatted_sku = str_replace('X', '', $raw_sku);
 		$formatted_sku = str_replace('-', '', $formatted_sku);
-		echo '<br/><span class="code-key">Code Key: ' . $formatted_sku . '</span>';
+		echo '<br/><span class="code-key">Code Key: ' . esc_html( $formatted_sku ) . '</span>';
 	}
 
 	/**
@@ -710,13 +710,13 @@ class Cart {
 			echo '<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details">';
 
 			if ( $po ) {
-				echo '<li>Sales Order #: <strong>' . $po . '</strong></li>';
+				echo '<li>Sales Order #: <strong>' . esc_html( $po ) . '</strong></li>';
 			}
 			if ( $tag ) {
-				echo '<li>Tag: <strong>' . $tag . '</strong></li>';
+				echo '<li>Tag: <strong>' . esc_html( $tag ) . '</strong></li>';
 			}
 			if ( $send_to ) {
-				echo '<li>Copied Emails: <strong>' . $send_to . '</strong></li>';
+				echo '<li>Copied Emails: <strong>' . esc_html( $send_to ) . '</strong></li>';
 			}
 			if ( $copy_geovin ) {
 				echo '<li>Sales Order was sent to Geovin.</li>';
@@ -767,13 +767,13 @@ class Cart {
 			$address['location_data']['first_name'] = $user->first_name;
 			$address['location_data']['last_name'] = $user->last_name;
 			$location_json = json_encode($address['location_data']);
-			$select_html .= '<option value="' . $address['name'] . '" data-location="' . htmlspecialchars($location_json) . '">' . $address['name'] . '</option>';
+			$select_html .= '<option value="' . esc_attr( $address['name'] ) . '" data-location="' . htmlspecialchars($location_json) . '">' . esc_html( $address['name'] ) . '</option>';
 		}
 		$my_addresses = get_user_meta( get_current_user_id(), 'saved_shipping_addresses', true );
 		if ( is_array( $my_addresses ) ) {
 			foreach ( $my_addresses as $key => $address ) {
 				$location_json = json_encode($address);
-				$select_html .= '<option value="' . $key . '" data-location="' . htmlspecialchars($location_json) . '">' . $key . '</option>';
+				$select_html .= '<option value="' . esc_attr( $key ) . '" data-location="' . htmlspecialchars($location_json) . '">' . esc_html( $key ) . '</option>';
 			}
 		}
 		$select_html .= '</select><small>Select an existing address to auto-populate shipping fields.</small></p>';
@@ -793,7 +793,7 @@ class Cart {
 		if ( is_array( $addresses ) ) {
 			foreach ( $addresses as $key => $address ) {
 				$location_json = json_encode($address);
-				$select_html .= '<option value="' . $key . '" data-location="' . htmlspecialchars($location_json) . '">' . $key . '</option>';
+				$select_html .= '<option value="' . esc_attr( $key ) . '" data-location="' . htmlspecialchars($location_json) . '">' . esc_html( $key ) . '</option>';
 			}
 		}
 		$select_html .= '</select><small>Select an existing saved address to edit it or add new address.</small></p>';
@@ -821,7 +821,7 @@ class Cart {
 			    $this_address['country'] = isset( $address['location_data']['country_short'] ) ? $address['location_data']['country_short'] : $address['location_data']['country'];
 			    $this_address['state'] = isset( $address['location_data']['state_short'] ) ? $address['location_data']['state_short'] : $address['location_data']['state'];
 				
-				$li_html .= '<li><strong>' . $address['name'] . '</strong><br/>'. WC()->countries->get_formatted_address( $this_address ) .'</li>';
+				$li_html .= '<li><strong>' . esc_html( $address['name'] ) . '</strong><br/>'. WC()->countries->get_formatted_address( $this_address ) .'</li>';
 			}
 		}
 		$li_html .= '</ul>';
@@ -843,7 +843,7 @@ class Cart {
 					$adjusted_key = str_replace('shipping_', '', $key);
 					$address[$adjusted_key] = $field;
 				}
-				$li_html .= '<li><strong>' . $address['shipping_address_name'] . '</strong><br/>'. WC()->countries->get_formatted_address( $address ) .'</li>';
+				$li_html .= '<li><strong>' . esc_html( $address['shipping_address_name'] ) . '</strong><br/>'. WC()->countries->get_formatted_address( $address ) .'</li>';
 			}
 		}
 		$li_html .= '</ul>';

@@ -288,7 +288,7 @@ class Invite_Users {
         }
         if ( ! empty( self::$invite_count ) ) {
             ?>
-            <div class="notice notice-success is-dismissible"><p><?php echo $message; ?></p></div>
+            <div class="notice notice-success is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
             <?php
         }
     }
@@ -301,7 +301,7 @@ class Invite_Users {
     public function options_updated_notice() {
         $message = 'Your default email copy has been updated.';
         ?>
-        <div class="notice notice-success is-dismissible"><p><?php echo $message; ?></p></div>
+        <div class="notice notice-success is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
         <?php
     }
 
@@ -313,7 +313,7 @@ class Invite_Users {
     public function no_invites_sent_notice() {
         $message = 'No emails were provided and no invites were sent.';
         ?>
-        <div class="notice notice-error is-dismissible"><p><?php echo $message; ?></p></div>
+        <div class="notice notice-error is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
         <?php
     }
 
@@ -325,7 +325,7 @@ class Invite_Users {
     public function must_assign_to_dealer_notice() {
         $message = 'When inviting users with a role of Dealer Staff or Manager, you must select a Dealer to assign them to.';
         ?>
-        <div class="notice notice-error is-dismissible"><p><?php echo $message; ?></p></div>
+        <div class="notice notice-error is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
         <?php
     }
 
@@ -338,7 +338,7 @@ class Invite_Users {
     public function must_assign_to_tier_notice() {
         $message = 'When inviting users with a role of Dealer Manager and no existing Dealer is assigned, you must select a Pricing Tier to assign them to.';
         ?>
-        <div class="notice notice-error is-dismissible"><p><?php echo $message; ?></p></div>
+        <div class="notice notice-error is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
         <?php
     }
 
@@ -351,7 +351,7 @@ class Invite_Users {
     public function no_role_selected_notice() {
         $message = 'No role was selected, and no invites have been sent. Please select a role to assign and try again.';
         ?>
-        <div class="notice notice-error is-dismissible"><p><?php echo $message; ?></p></div>
+        <div class="notice notice-error is-dismissible"><p><?php echo esc_html( $message ); ?></p></div>
         <?php
     }
 
@@ -366,7 +366,7 @@ class Invite_Users {
     public function user_exists_notice( $email, $name = null ) {
         self::$existing[] = $email;
         ?>
-        <div class="notice notice-warning is-dismissible"><p><?php echo $name ? $name . ' is already a user with ' . $email . ', invite not sent.' : $email . ' is already in use, invite not sent.' ; ?></p></div>
+        <div class="notice notice-warning is-dismissible"><p><?php echo $name ? esc_html( $name ) . ' is already a user with ' . esc_html( $email ) . ', invite not sent.' : esc_html( $email ) . ' is already in use, invite not sent.' ; ?></p></div>
         <?php
     }
 
@@ -416,7 +416,7 @@ class Invite_Users {
         $style = "-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;outline-color:0;text-decoration:none;display:block;padding-top:0 !important;padding-bottom:0 !important;padding-right:12px !important;padding-left:12px !important;mso-padding-alt:0;background-color:#000000;border-left-width:8px;border-left-style:solid;border-left-color:#000000;border-right-width:8px;border-right-style:solid;border-right-color:#000000;mso-border-alt:8px solid #000000;color:white;font-family:'Helvetica Neue', Helvetica, Arial, sans-serif;font-size:14px;font-weight:500;line-height:38px;mso-line-height-rule:exactly;text-align:center;vertical-align:middle;white-space:nowrap;width:fit-content;";
         $current_users_email_content = str_replace( '{{name}}', $name, $current_users_email_content );
         $current_users_email_content = str_replace( '{{email}}', $email, $current_users_email_content );
-        $current_users_email_content = str_replace( '{{invite_link}}', '<a href="' . $link . '" style="'. $style .'">Accept Invitation</a>', $current_users_email_content );
+        $current_users_email_content = str_replace( '{{invite_link}}', '<a href="' . esc_url( $link ) . '" style="'. $style .'">Accept Invitation</a>', $current_users_email_content );
 
         $current_users_email_subject = str_replace( '{{name}}', $name, $current_users_email_subject );
         $current_users_email_subject = str_replace( '{{email}}', $email, $current_users_email_subject );
@@ -425,12 +425,12 @@ class Invite_Users {
         ob_start();
         require_once( get_plugin_dir() . 'templates/header-default.php' );
         echo '<table><tr><td>';
-        echo preg_replace('/\r\n|[\r\n]/','<br/>', $current_users_email_content);
+        echo esc_html( preg_replace('/\r\n|[\r\n]/','<br/>', $current_users_email_content) );
         echo '</td></tr></table>';
         require_once( get_plugin_dir() . 'templates/footer-default.php' );
         $body = ob_get_clean();
         $subject = $current_users_email_subject;
-        $to = $email . ' <' . $name . '>';
+        $to = $email . ' <' . esc_html( $name ) . '>';
         //send email
         wp_mail( $email, $subject, $body, 'Content-Type: text/html; charset="UTF-8"' );
     }
@@ -544,9 +544,9 @@ class Invite_Users {
                         foreach( $roles as $key => $role ) {
                             // create a radio input
                             ?>
-                            <label for="<?php echo $key; ?>" style="margin-right:30px;">
-                                <input type="radio" id="<?php echo $key; ?>" name="role" value="<?php echo $key; ?>" <?php echo $first ? 'checked' : ''; ?> />
-                                <?php echo $role['name']; ?>
+                            <label for="<?php echo esc_attr( $key ); ?>" style="margin-right:30px;">
+                                <input type="radio" id="<?php echo esc_attr( $key ); ?>" name="role" value="<?php echo esc_attr( $key ); ?>" <?php echo $first ? 'checked' : ''; ?> />
+                                <?php echo esc_html( $role['name'] ); ?>
                             </label>
                             <?php 
                             $first = false;
@@ -567,7 +567,7 @@ class Invite_Users {
                         <?php 
                             foreach( $dealers as $dealer ) {
                                 ?>
-                                <option value="<?php echo $dealer->ID; ?>"><?php echo $dealer->post_title; ?></option>
+                                <option value="<?php echo esc_attr( $dealer->ID ); ?>"><?php echo esc_html( $dealer->post_title ); ?></option>
                                 <?php
                             }
                         ?>
@@ -583,9 +583,9 @@ class Invite_Users {
                     <h2>Email Copy</h2>
                     <p>You can edit the default email copy below. Select the "save as default" checkbox to update the default copy to your revised version. You may use the following merge tags: {{email}}, {{name}}, {{invite_link}} Note: if no name is provided the {{name}} merge tag will default to "Geovin Dealer"</p>
                     <label for="email_subject">Email Subject</label>
-                    <input type="text" id="email_subject" name="email_subject" style="width:100%;" value="<?php echo $default_email_subject; ?>" />
+                    <input type="text" id="email_subject" name="email_subject" style="width:100%;" value="<?php echo esc_attr( $default_email_subject ); ?>" />
                     <label for="email_copy" style="margin-top:1rem;">Email Content</label>
-                    <textarea id="email_copy" name="email_copy" style="width:100%;min-height:200px"><?php echo $default_email_copy; ?></textarea>
+                    <textarea id="email_copy" name="email_copy" style="width:100%;min-height:200px"><?php echo esc_html( $default_email_copy ); ?></textarea>
                     <label for="save_default"><input id="save_default" type="checkbox" name="save_default" /> Save as default</label>
                 </section>
                 <section>
@@ -655,7 +655,7 @@ class Invite_Users {
             );
             if ( $dealer_id ) {
                 $dealer_name = get_the_title( $dealer_id );
-                $pre_message = '<p>You are registering as staff of, <strong>' . $dealer_name . '</strong>. If this is not correct please request an alternate invite link.</p>';
+                $pre_message = '<p>You are registering as staff of, <strong>' . esc_html( $dealer_name ) . '</strong>. If this is not correct please request an alternate invite link.</p>';
             }
             echo $pre_message;
             gravity_form( $form_id, false, false, false, $field_values );
