@@ -238,7 +238,6 @@ class Add_Product_Type {
      * @return void
      */
     public static function get_variation_from_sku() {
-        ob_start();
 
         if ( empty( $_POST['sku'] ) ) {
             wp_die();
