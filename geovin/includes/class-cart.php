@@ -185,7 +185,7 @@ class Cart {
 		if ( isset($item['link_to_use']) ) {
 			$link .= '&' . $item['link_to_use'] . '&niceatts=' . urlencode( base64_encode( $attribute_selections ) );
 		} 
-		if ( $new_image ) {
+		if ( ! empty( $new_image ) ) {
 			if ( strpos($new_image, 'base64') !== false ) {
             	$new_image = GF_Filters::base64_to_png( $new_image );
             	$link .= '&image=' . $new_image;
@@ -630,7 +630,7 @@ class Cart {
 	 */
 	public function add_copies( $recipient, $order, $email ) {
 		$send_to = $order->get_meta('_billing_sales_order_send_to');
-		if ( $send_to ) {
+		if ( ! empty( $send_to ) ) {
 			$recipient = $recipient . ', ' . $send_to;
 		}
 		return $recipient;
@@ -649,15 +649,15 @@ class Cart {
 		$po = $order->get_meta('_billing_sales_order_po');
 		$tag = $order->get_meta('_billing_sales_order_tag');
 		$copy_geovin = $order->get_meta('_billing_sales_order_copy_geovin');
-		if ( $po || $tag ) {
+		if ( ! empty( $po ) || ! empty( $tag ) ) {
 			$subject .= ' - ';
 		}
-		if ( $po ) {
+		if ( ! empty ( $po ) ) {
 			$subject .= 'Sales Order# ' . $po;
 		}
-		if ( $po && $tag ) {
+		if ( ! empty( $po ) && ! empty( $tag ) ) {
 			$subject .= ', Tag# ' . $tag;
-		} elseif ( $tag ) {
+		} elseif ( ! empty( $tag ) ) {
 			$subject .= 'Tag# ' . $tag;
 		}
 
@@ -706,16 +706,16 @@ class Cart {
 		$tag = $order->get_meta('_billing_sales_order_tag');
 		$send_to = $order->get_meta('_billing_sales_order_send_to');
 		$copy_geovin = $order->get_meta('_billing_sales_order_copy_geovin');
-		if ( $po || $tag || $send_to ) {
+		if ( ! empty( $po ) || ! empty ( $tag ) || ! empty( $send_to ) ) {
 			echo '<ul class="woocommerce-order-overview woocommerce-thankyou-order-details order_details">';
 
-			if ( $po ) {
+			if ( ! empty( $po ) ) {
 				echo '<li>Sales Order #: <strong>' . esc_html( $po ) . '</strong></li>';
 			}
-			if ( $tag ) {
+			if ( ! empty( $tag ) ) {
 				echo '<li>Tag: <strong>' . esc_html( $tag ) . '</strong></li>';
 			}
-			if ( $send_to ) {
+			if ( ! empty( $send_to ) ) {
 				echo '<li>Copied Emails: <strong>' . esc_html( $send_to ) . '</strong></li>';
 			}
 			if ( $copy_geovin ) {
@@ -938,18 +938,18 @@ class Cart {
 		$i++;
 		
 		$shipping_email = $order->get_meta('_shipping_email');
-		if ( $shipping_email ) {
+		if ( ! empty( $shipping_email ) ) {
 			$address = $address . $shipping_email . '<br/>';
 		}
 		$i++;
 		$shipping_phone = $order->get_meta('_shipping_phone');
-		if ( $shipping_phone ) {
+		if ( ! empty( $shipping_phone ) ) {
 			$address = $address . $shipping_phone . '<br/>';
 		}
 		$i++;
 
 		$shipping_note = $order->get_meta('_shipping_note');
-		if ( $shipping_note ) {
+		if ( ! empty( $shipping_note ) ) {
 			$address = $address . $shipping_note . '<br/>';
 		}
 		$i++;
