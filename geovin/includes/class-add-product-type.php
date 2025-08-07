@@ -17,6 +17,7 @@ class Add_Product_Type {
         add_action( 'woocommerce_loaded', array( $this, 'load_product_type' ) );
         add_filter( 'product_type_selector', array( $this, 'add_type' ) );
         register_activation_hook( __FILE__, array( $this, 'install' ) );
+        add_action( 'woocommerce_installed', array( $this, 'install' ) );
 
         add_filter('woocommerce_product_class', array( $this, 'geovin_variable_product_type_class'), 10, 2);
 
